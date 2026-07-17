@@ -1,0 +1,1992 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Concept of Mole &amp; Chemical Counting — Chapter Six</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;0,6..72,700;1,6..72,500;1,6..72,600&family=Caveat:wght@500;600;700&family=Work+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   TOKENS
+============================================================ */
+:root{
+  --bg: #0b1a2c;
+  --bg-2: #122642;
+  --bg-3: #1a3358;
+  --bg-3-hi: #22406c;
+  --chalk: #eef1f7;
+  --chalk-dim: #9fb0c7;
+  --chalk-faint: #66788f;
+  --gold: #e8b84b;
+  --gold-dim: #c99f42;
+  --teal: #45c7d6;
+  --teal-dim: #2f8f97;
+  --coral: #e8724a;
+  --coral-dim: #a9502f;
+  --blue: #63a9f0;
+  --blue-dim: #3f6f9e;
+  --line: rgba(238,241,247,0.14);
+  --line-soft: rgba(238,241,247,0.07);
+  --shadow: 0 20px 50px rgba(0,0,0,0.45);
+  --radius: 14px;
+  --serif: "Newsreader", serif;
+  --hand: "Caveat", cursive;
+  --body: "Work Sans", sans-serif;
+  --mono: "IBM Plex Mono", monospace;
+  --maxw: 1180px;
+}
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; transition-duration: 0.001ms !important; scroll-behavior: auto !important; }
+}
+
+*,*::before,*::after{ box-sizing: border-box; }
+html{ scroll-behavior: smooth; }
+body{
+  margin:0;
+  background: var(--bg);
+  color: var(--chalk);
+  font-family: var(--body);
+  font-size: 16.5px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+::selection{ background: var(--gold); color: #16261e; }
+
+img,svg{ display:block; max-width:100%; }
+a{ color: var(--teal); }
+h1,h2,h3,h4{ font-family: var(--serif); font-weight: 600; margin: 0; color: var(--chalk); }
+p{ margin: 0 0 1em; color: var(--chalk); }
+p:last-child{ margin-bottom:0; }
+button{ font-family: inherit; }
+
+.container{ max-width: var(--maxw); margin: 0 auto; padding: 0 28px; position: relative; }
+@media (max-width: 640px){ .container{ padding: 0 18px; } }
+
+/* subtle chalk grain texture on everything */
+body::before{
+  content:"";
+  position: fixed; inset:0; z-index: 0; pointer-events:none;
+  opacity: .5;
+  background-image:
+    radial-gradient(rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 3px 3px;
+  mix-blend-mode: overlay;
+}
+
+/* ============================================================
+   CHALK DUST CANVAS (ambient, behind hero)
+============================================================ */
+#chalkDust{
+  position: fixed; inset:0; width:100%; height:100%;
+  z-index:0; pointer-events:none; opacity:.55;
+}
+
+/* ============================================================
+   PROGRESS RAIL / NAV
+============================================================ */
+.rail{
+  position: fixed; top:0; left:0; height:100%;
+  width: 250px;
+  padding: 28px 14px 28px 28px;
+  z-index: 40;
+  display:flex; flex-direction:column;
+  transform: translateX(-100%);
+  transition: transform .45s cubic-bezier(.2,.8,.2,1);
+}
+.rail.is-open{ transform: translateX(0); }
+.rail__scroll{
+  overflow-y:auto; padding-right:8px; margin-top:14px;
+  scrollbar-width: thin; scrollbar-color: var(--bg-3-hi) transparent;
+}
+.rail__brand{
+  font-family: var(--hand); font-size: 1.5rem; color: var(--gold);
+  display:flex; align-items:center; gap:8px;
+}
+.rail__brand small{ font-family: var(--mono); font-size:.6rem; color: var(--chalk-faint); letter-spacing:.12em; }
+.rail a.rail__item{
+  display:flex; align-items:center; gap:10px;
+  padding: 7px 10px; margin: 1px 0;
+  border-radius: 8px;
+  text-decoration:none;
+  color: var(--chalk-dim);
+  font-size: .83rem;
+  line-height:1.3;
+  transition: background .2s, color .2s;
+}
+.rail a.rail__item:hover{ background: var(--line-soft); color: var(--chalk); }
+.rail a.rail__item.is-active{ color: var(--gold); background: rgba(232,184,75,0.08); }
+.rail__box{
+  width:15px; height:15px; border-radius:4px; flex:none;
+  border: 1.5px solid var(--chalk-faint);
+  position: relative;
+}
+.rail a.rail__item.is-done .rail__box{ border-color: var(--teal); background: var(--teal); }
+.rail a.rail__item.is-done .rail__box::after{
+  content:""; position:absolute; left:3px; top:0px; width:4px; height:8px;
+  border-right:2px solid #0b1a2c; border-bottom:2px solid #0b1a2c;
+  transform: rotate(45deg);
+}
+.rail a.rail__item.is-active .rail__box{ border-color: var(--gold); }
+
+.railToggle{
+  position: fixed; top:18px; left:18px; z-index: 50;
+  width:44px; height:44px; border-radius:50%;
+  background: var(--bg-3); border:1px solid var(--line);
+  display:flex; align-items:center; justify-content:center;
+  cursor:pointer; color: var(--chalk);
+  box-shadow: var(--shadow);
+}
+.railToggle span, .railToggle span::before, .railToggle span::after{
+  content:""; display:block; width:18px; height:2px; background: var(--chalk); border-radius:2px;
+  transition: transform .3s, opacity .3s;
+}
+.railToggle span::before{ position:relative; top:-5px; }
+.railToggle span::after{ position:relative; top:3px; }
+.railToggle.is-open span{ background: transparent; }
+.railToggle.is-open span::before{ top:0; transform: rotate(45deg); }
+.railToggle.is-open span::after{ top:-2px; transform: rotate(-45deg); }
+
+.topProgress{
+  position: fixed; top:0; left:0; height:3px; background: linear-gradient(90deg,var(--gold),var(--teal));
+  z-index: 60; width:0%; transition: width .1s linear;
+}
+
+.railScrim{
+  position: fixed; inset:0; background: rgba(10,18,15,0.5); z-index:35;
+  opacity:0; pointer-events:none; transition: opacity .3s;
+}
+.railScrim.is-open{ opacity:1; pointer-events:auto; }
+
+@media (min-width: 1240px){
+  .rail{ transform: translateX(0); background:transparent; }
+  .railToggle, .railScrim{ display:none; }
+  main, .hero, footer.site-footer{ margin-left: 250px; }
+}
+
+/* ============================================================
+   HERO
+============================================================ */
+.hero{
+  position: relative; min-height: 100svh;
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  text-align:center; padding: 90px 20px 60px;
+  overflow: hidden;
+  z-index:1;
+}
+.hero__eyebrow{
+  font-family: var(--mono); letter-spacing:.35em; text-transform:uppercase;
+  color: var(--teal); font-size: .72rem; margin-bottom: 18px;
+  opacity:0; animation: fadeUp .9s .1s forwards ease;
+}
+.hero__title{
+  font-size: clamp(2.8rem, 8vw, 6rem);
+  font-style: italic;
+  font-weight: 600;
+  color: var(--chalk);
+  line-height: 1.02;
+  opacity:0; animation: fadeUp 1s .25s forwards ease;
+}
+.hero__title em{ color: var(--gold); font-style: italic; }
+.hero__tagline{
+  font-family: var(--hand); font-size: clamp(1.3rem, 2.6vw, 1.9rem);
+  color: var(--chalk-dim); margin-top: 18px; max-width: 620px;
+  opacity:0; animation: fadeUp 1s .45s forwards ease;
+}
+.hero__stage{
+  margin-top: 46px; width: min(90vw, 460px); aspect-ratio: 1.6/1;
+  opacity:0; animation: fadeUp 1.2s .6s forwards ease;
+}
+.hero__scroll{
+  margin-top: 40px; display:flex; flex-direction:column; align-items:center; gap:8px;
+  color: var(--chalk-faint); font-family: var(--mono); font-size:.68rem; letter-spacing:.2em; text-transform:uppercase;
+  opacity:0; animation: fadeUp 1s .8s forwards ease;
+}
+.hero__scroll .chevron{ width:14px; height:14px; border-right:2px solid var(--chalk-faint); border-bottom:2px solid var(--chalk-faint); transform: rotate(45deg); animation: bob 1.6s infinite ease-in-out; }
+
+@keyframes fadeUp{ from{ opacity:0; transform: translateY(16px);} to{opacity:1; transform:none;} }
+@keyframes bob{ 0%,100%{ transform: rotate(45deg) translate(0,0);} 50%{ transform: rotate(45deg) translate(4px,4px);} }
+
+/* ============================================================
+   SECTION SHELL
+============================================================ */
+main{ position:relative; z-index:1; }
+.chapter-section{
+  padding: 88px 0;
+  border-top: 1px solid var(--line-soft);
+}
+.chapter-section:first-child{ border-top:none; }
+.sec-head{ max-width: 760px; margin-bottom: 40px; }
+.sec-eyebrow{
+  font-family: var(--mono); color: var(--gold); font-size:.78rem;
+  letter-spacing:.14em; margin-bottom: 10px; display:flex; align-items:center; gap:10px;
+}
+.sec-eyebrow::before{ content:""; width:26px; height:1px; background: var(--gold); display:inline-block; }
+.sec-title{ font-size: clamp(1.8rem, 3.4vw, 2.6rem); margin-bottom: 14px; }
+.sec-title i{ color: var(--gold); }
+.sec-lede{ color: var(--chalk-dim); font-size: 1.05rem; max-width: 680px; }
+
+.reveal{ opacity:0; transform: translateY(26px); transition: opacity .7s ease, transform .7s cubic-bezier(.2,.7,.2,1); }
+.reveal.is-visible{ opacity:1; transform:none; }
+
+/* ============================================================
+   PROSE / CARDS SHARED
+============================================================ */
+.prose{ color: var(--chalk); max-width: 760px; }
+.prose p{ margin-bottom: 1.1em; }
+.prose strong{ color: var(--gold); font-weight:600; }
+
+.grid-2{ display:grid; grid-template-columns: 1fr 1fr; gap: 32px; }
+.grid-3{ display:grid; grid-template-columns: repeat(3,1fr); gap: 20px; }
+@media (max-width: 860px){ .grid-2{ grid-template-columns:1fr; } .grid-3{ grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px){ .grid-3{ grid-template-columns: 1fr; } }
+
+.panel{
+  background: linear-gradient(180deg, var(--bg-3), var(--bg-2));
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: 26px;
+  box-shadow: var(--shadow);
+}
+
+/* handwritten aside / did-you-know */
+.aside{
+  position:relative;
+  margin: 28px 0; padding: 18px 22px 18px 54px;
+  border: 1.5px dashed var(--gold-dim);
+  border-radius: 12px;
+  background: rgba(232,184,75,0.05);
+  max-width: 720px;
+}
+.aside::before{
+  content: "✦"; position:absolute; left:18px; top:16px; color: var(--gold); font-size:1.1rem;
+}
+.aside__label{
+  font-family: var(--hand); font-size: 1.3rem; color: var(--gold); display:block; margin-bottom:4px;
+}
+.aside p{ color: var(--chalk-dim); font-size: .96rem; margin:0; }
+.aside p + p{ margin-top:.6em; }
+
+.callout-row{ display:flex; flex-wrap:wrap; gap:22px; margin: 28px 0; }
+.callout-row .aside{ flex:1 1 300px; margin:0; }
+
+/* eyebrow numeral badge */
+.numeral{
+  font-family: var(--mono); font-size:.72rem; color: var(--bg);
+  background: var(--gold); border-radius:5px; padding: 2px 7px; font-weight:600;
+}
+
+/* ============================================================
+   BUTTONS / CHIPS / TABS
+============================================================ */
+.btn{
+  font-family: var(--mono); font-size:.82rem; letter-spacing:.02em;
+  background: var(--gold); color:#1a2b21; border:none; border-radius:9px;
+  padding: 11px 20px; cursor:pointer; font-weight:600;
+  transition: transform .15s ease, box-shadow .15s ease, background .2s;
+  box-shadow: 0 6px 16px rgba(232,184,75,0.18);
+}
+.btn:hover{ transform: translateY(-2px); background: #f0c661; }
+.btn:active{ transform: translateY(0); }
+.btn--ghost{
+  background: transparent; color: var(--chalk); border: 1px solid var(--line);
+  box-shadow:none;
+}
+.btn--ghost:hover{ background: var(--line-soft); border-color: var(--gold-dim); color:var(--gold); }
+.btn--teal{ background: var(--teal); color:#0e2a26; box-shadow: 0 6px 16px rgba(95,208,192,0.2); }
+.btn--teal:hover{ background:#7adfd1; }
+.btn[disabled]{ opacity:.4; cursor:not-allowed; transform:none !important; }
+
+.chip{
+  display:inline-flex; align-items:center; gap:6px;
+  font-family: var(--mono); font-size:.78rem;
+  padding: 7px 13px; border-radius: 20px;
+  border: 1px solid var(--line); color: var(--chalk-dim);
+  background: var(--bg-2); cursor:pointer;
+  transition: all .18s ease;
+}
+.chip:hover{ border-color: var(--teal-dim); color: var(--chalk); }
+.chip.is-active{ background: var(--teal); color:#0e2a26; border-color: var(--teal); font-weight:600; }
+.chip-row{ display:flex; flex-wrap:wrap; gap:9px; margin: 18px 0; }
+
+.tabset__nav{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:22px; }
+.tab-panel{ display:none; }
+.tab-panel.is-active{ display:block; animation: fadeUp .5s ease; }
+
+/* ============================================================
+   TABLES
+============================================================ */
+.table-wrap{ overflow-x:auto; border-radius: var(--radius); border:1px solid var(--line); }
+table.data-table{ width:100%; border-collapse:collapse; font-size:.92rem; min-width: 480px; }
+table.data-table caption{ caption-side: top; text-align:left; font-family:var(--mono); font-size:.75rem; color:var(--chalk-faint); padding:10px 16px; }
+table.data-table th, table.data-table td{ padding: 11px 16px; text-align:left; border-bottom:1px solid var(--line-soft); }
+table.data-table thead th{
+  background: var(--bg-3); color: var(--gold); font-family: var(--mono); font-weight:600; font-size:.78rem;
+  letter-spacing:.04em; text-transform:uppercase; position: sticky; top:0;
+}
+table.data-table tbody tr{ background: var(--bg-2); transition: background .15s; }
+table.data-table tbody tr:hover{ background: var(--bg-3); }
+table.data-table td.mono, table.data-table th.mono{ font-family: var(--mono); }
+table.data-table sub{ font-size:.7em; }
+
+/* ============================================================
+   COUNTING SCALE (dozen / hundred / thousand / mole)
+============================================================ */
+.scale-row{ display:flex; align-items:stretch; gap:0; flex-wrap:wrap; margin: 26px 0; }
+.scale-step{
+  flex:1 1 140px; background: var(--bg-2); border:1px solid var(--line);
+  padding: 18px 16px; text-align:center; position:relative;
+}
+.scale-step:first-child{ border-radius: var(--radius) 0 0 var(--radius); }
+.scale-step:last-child{ border-radius: 0 var(--radius) var(--radius) 0; border-color: var(--gold-dim); background: rgba(232,184,75,0.08); }
+.scale-step .n{ font-family: var(--mono); font-size:1.05rem; color: var(--teal); }
+.scale-step:last-child .n{ color: var(--gold); font-size:1.15rem; }
+.scale-step .lbl{ font-size:.74rem; color: var(--chalk-dim); text-transform:uppercase; letter-spacing:.06em; margin-top:4px; }
+.scale-step:not(:last-child)::after{
+  content:"→"; position:absolute; right:-14px; top:50%; transform:translateY(-50%);
+  color: var(--chalk-faint); font-size:1rem; z-index:2;
+}
+@media (max-width: 700px){
+  .scale-row{ flex-direction:column; }
+  .scale-step:not(:last-child)::after{ content:"↓"; right:50%; top:auto; bottom:-16px; transform:translateX(50%); }
+  .scale-step{ border-radius:0 !important; }
+  .scale-step:first-child{ border-radius: var(--radius) var(--radius) 0 0 !important; }
+  .scale-step:last-child{ border-radius: 0 0 var(--radius) var(--radius) !important; }
+}
+
+/* ============================================================
+   MOLE CONVERTER (hub + spokes)
+============================================================ */
+.converter{
+  display:grid; grid-template-columns: 1fr 1fr; gap:18px;
+}
+@media (max-width: 720px){ .converter{ grid-template-columns:1fr; } }
+.converter__field{
+  background: var(--bg-2); border:1px solid var(--line); border-radius: 12px; padding: 14px 16px;
+}
+.converter__field.is-hub{ border-color: var(--gold-dim); background: rgba(232,184,75,0.07); grid-column: 1 / -1; }
+.converter__field label{ display:block; font-family: var(--mono); font-size:.7rem; color: var(--chalk-faint); text-transform:uppercase; letter-spacing:.06em; margin-bottom:8px; }
+.converter__field input, .converter__field select{
+  width:100%; background: var(--bg-3); color: var(--chalk); border:1px solid var(--line);
+  border-radius:8px; padding: 10px 12px; font-family: var(--mono); font-size:.95rem;
+}
+.converter__field .unit{ font-family:var(--mono); font-size:.72rem; color: var(--chalk-faint); margin-top:6px; display:block; }
+.converter__hint{ font-family: var(--mono); font-size:.78rem; color: var(--chalk-dim); text-align:center; margin-top:16px; }
+.converter__hint b{ color: var(--gold); }
+
+/* ============================================================
+   GENERIC SOLVER (molarity / stoichiometry / percent yield)
+============================================================ */
+.solver-toggle{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:20px; }
+.solver-grid{ display:grid; grid-template-columns: repeat(4,1fr); gap:14px; }
+@media (max-width: 860px){ .solver-grid{ grid-template-columns: repeat(2,1fr); } }
+.solver-field{ background: var(--bg-2); border:1px solid var(--line); border-radius:12px; padding:14px 16px; }
+.solver-field.is-target{ border-color: var(--gold); background: rgba(232,184,75,0.09); }
+.solver-field label{ display:block; font-family: var(--mono); font-size:.68rem; color: var(--chalk-faint); text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px; }
+.solver-field input{
+  width:100%; background: var(--bg-3); color: var(--chalk); border:1px solid var(--line);
+  border-radius:8px; padding: 9px 11px; font-family: var(--mono); font-size:.92rem;
+}
+.solver-field input:disabled{ color: var(--gold); opacity:1; font-weight:600; border-color: var(--gold-dim); }
+.solver-result{
+  margin-top:22px; padding: 22px; border-radius: var(--radius);
+  background: var(--bg-2); border: 1px solid var(--line); text-align:center;
+}
+.solver-result .answer{ font-family: var(--mono); font-size: 2rem; color: var(--gold); }
+.solver-result .steps{ margin-top:12px; font-family: var(--mono); font-size:.82rem; color: var(--chalk-dim); text-align:left; max-width:480px; margin-left:auto; margin-right:auto; }
+.solver-result .steps div{ padding: 3px 0; border-bottom: 1px dashed var(--line-soft); }
+.solver-result .steps div:last-child{ border-bottom:none; }
+
+/* ============================================================
+   STEPPER (empirical formula / equation balancing walkthroughs)
+============================================================ */
+.stepper{
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.03), transparent 70%), var(--bg-2);
+  border:1px solid var(--line); border-radius: var(--radius);
+  padding: 28px; position:relative; overflow:hidden;
+}
+.stepper__dots{ display:flex; justify-content:center; gap:8px; margin-bottom:20px; }
+.stepper__dots .dot{ width:8px; height:8px; border-radius:50%; background: var(--line); transition: background .3s, transform .3s; }
+.stepper__dots .dot.is-active{ background: var(--gold); transform: scale(1.3); }
+.stepper__dots .dot.is-done{ background: var(--teal-dim); }
+.stepper__body{ min-height: 220px; }
+.stepper__title{ font-family: var(--mono); color: var(--gold); font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; margin-bottom:14px; text-align:center; }
+.stepper__content{ color: var(--chalk-dim); font-size:.95rem; text-align:center; }
+.stepper__content .big{ font-family: var(--mono); font-size:1.3rem; color: var(--chalk); margin: 16px 0; }
+.stepper__controls{ display:flex; justify-content:center; gap:10px; margin-top:22px; }
+.tally{ display:flex; justify-content:center; gap:28px; flex-wrap:wrap; margin: 18px 0; }
+.tally__item{ text-align:center; }
+.tally__item .sym{ font-family:var(--mono); font-size:1.1rem; color:var(--chalk); }
+.tally__bars{ display:flex; align-items:center; gap:10px; justify-content:center; margin-top:8px; }
+.tally__bar{ display:flex; flex-direction:column; align-items:center; gap:4px; }
+.tally__bar .count{ font-family:var(--mono); font-size:1.3rem; font-weight:700; transition: color .3s; }
+.tally__bar .count.balanced{ color: var(--teal); }
+.tally__bar .count.unbalanced{ color: var(--coral); }
+.tally__bar .side{ font-family:var(--mono); font-size:.62rem; color:var(--chalk-faint); text-transform:uppercase; }
+.eq-display{ font-family: var(--mono); font-size: clamp(1rem,3vw,1.5rem); color: var(--chalk); text-align:center; letter-spacing:.02em; margin: 6px 0; }
+.eq-display .coef{ color: var(--gold); font-weight:700; display:inline-block; transition: transform .3s; }
+.eq-display .coef.is-bump{ transform: scale(1.4); }
+.eq-display .arrow{ color: var(--chalk-faint); margin: 0 10px; }
+.eq-display .plus{ color: var(--chalk-faint); margin: 0 8px; }
+
+/* ============================================================
+   PARTICLE GRID (limiting reactant visualizer)
+============================================================ */
+.particle-stage{ text-align:center; }
+.particle-grid{ display:flex; flex-wrap:wrap; gap:10px; justify-content:center; max-width:560px; margin:0 auto; padding: 16px 0; min-height:70px; }
+.particle{
+  width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  font-family: var(--mono); font-size:.68rem; font-weight:700; flex:none;
+  transition: opacity .4s, transform .4s, background .4s;
+}
+.particle.metal{ background: var(--coral); color:#2a1207; }
+.particle.nonmetal{ background: var(--blue); color:#0b1a2c; }
+.particle.is-leftover{ opacity:.28; transform: scale(0.85); }
+.particle.is-matched{ box-shadow: 0 0 0 2px var(--teal); }
+.legend-row{ display:flex; gap:22px; justify-content:center; flex-wrap:wrap; margin-top:14px; font-family:var(--mono); font-size:.76rem; color:var(--chalk-dim); }
+.legend-dot{ width:11px; height:11px; border-radius:50%; display:inline-block; margin-right:6px; vertical-align:middle; }
+
+/* ============================================================
+   BEAKER (dilute vs concentrated demo)
+============================================================ */
+.beaker-demo{ display:grid; grid-template-columns: 1fr 1.3fr; gap:30px; align-items:center; }
+@media (max-width: 780px){ .beaker-demo{ grid-template-columns:1fr; } }
+.beaker-demo svg{ margin:0 auto; }
+.beaker-glass{ fill: rgba(238,241,247,0.04); stroke: var(--chalk-faint); stroke-width:2; }
+.solute-dot{ fill: var(--gold); filter: drop-shadow(0 0 3px rgba(232,184,75,0.8)); }
+.range-row{ display:flex; align-items:center; gap:14px; }
+.range-row input[type=range]{ flex:1; accent-color: var(--gold); }
+.range-label{ font-family: var(--mono); font-size:.85rem; color: var(--gold); min-width:110px; text-align:right; }
+
+/* ============================================================
+   FACT LIST (numbered info rows)
+============================================================ */
+.fact-list{ counter-reset: fact; margin: 20px 0; }
+.fact-item{
+  display:flex; gap:16px; align-items:flex-start; padding: 14px 0;
+  border-bottom: 1px solid var(--line-soft);
+}
+.fact-item:last-child{ border-bottom:none; }
+.fact-item::before{
+  counter-increment: fact; content: counter(fact);
+  flex:none; width:28px; height:28px; border-radius:50%;
+  background: var(--bg-3); border:1px solid var(--gold-dim); color: var(--gold);
+  display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:.8rem; font-weight:700;
+}
+.fact-item p{ color: var(--chalk-dim); font-size:.94rem; padding-top:3px; }
+.fact-item strong{ color: var(--chalk); }
+
+/* ============================================================
+   PROCEDURE LIST (lab experiment steps)
+============================================================ */
+.procedure-list{ counter-reset: step; margin: 18px 0; }
+.procedure-item{ display:flex; gap:16px; margin-bottom:16px; align-items:flex-start; }
+.procedure-item::before{
+  counter-increment: step; content: counter(step);
+  flex:none; width:30px; height:30px; border-radius:9px;
+  background: var(--teal); color:#0e2a26; font-family:var(--mono); font-weight:700; font-size:.85rem;
+  display:flex; align-items:center; justify-content:center;
+}
+.procedure-item p{ color: var(--chalk-dim); font-size:.93rem; margin:0; padding-top:5px; }
+.caution-box{
+  margin-top:18px; padding:16px 20px; border-radius:12px; background: rgba(232,114,74,0.08);
+  border: 1px solid var(--coral-dim); font-size:.88rem; color: var(--chalk-dim);
+}
+.caution-box b{ color: var(--coral); }
+.materials-row{ display:flex; flex-wrap:wrap; gap:8px; margin: 14px 0 20px; }
+.material-chip{
+  font-family: var(--mono); font-size:.76rem; padding: 6px 12px; border-radius:20px;
+  background: var(--bg-3); border:1px solid var(--line); color: var(--chalk-dim);
+}
+
+/* ============================================================
+   BAR CHART (reused, generic)
+============================================================ */
+.bar-chart{ display:flex; align-items:flex-end; gap: 26px; height: 180px; padding: 0 10px; }
+.bar-chart .bar-col{ flex:1; display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; }
+.bar-chart .bar{ width: 100%; max-width:56px; border-radius: 6px 6px 0 0; transition: height 1s cubic-bezier(.2,.8,.2,1); height:0; }
+.bar-chart .bar-label{ margin-top:10px; font-family:var(--mono); font-size:.72rem; color: var(--chalk-dim); text-align:center; }
+.bar-chart .bar-value{ font-family:var(--mono); font-size:.78rem; color: var(--gold); margin-bottom:6px; }
+
+/* ============================================================
+   RULE CARDS (chemical equation rules)
+============================================================ */
+.exp-grid{ display:grid; grid-template-columns: 1fr 1fr; gap:24px; }
+@media (max-width: 780px){ .exp-grid{ grid-template-columns:1fr; } }
+.exp-card{
+  background: var(--bg-2); border:1px solid var(--line); border-radius: var(--radius);
+  padding: 22px;
+}
+.exp-card h5{ font-family: var(--body); font-size:.95rem; color: var(--chalk); margin-bottom: 10px; font-weight:600; }
+
+/* ============================================================
+   FORMULA BUILDER / RESULT PANEL (generic, reused across calculators)
+============================================================ */
+.builder{ display:grid; grid-template-columns: 1fr auto 1fr; gap: 18px; align-items:center; }
+@media (max-width: 720px){ .builder{ grid-template-columns:1fr; } .builder .plus-sign{ justify-self:center; } }
+.builder select{
+  width:100%; background: var(--bg-2); color: var(--chalk); border:1px solid var(--line);
+  border-radius:10px; padding: 13px 14px; font-family: var(--mono); font-size:.9rem;
+}
+.builder .plus-sign{ font-family:var(--mono); color: var(--chalk-faint); font-size:1.4rem; }
+.builder-result{
+  margin-top: 30px; padding: 30px; border-radius: var(--radius);
+  background: var(--bg-2); border: 1px solid var(--line); text-align:center;
+}
+.builder-result .crisscross{ display:flex; align-items:center; justify-content:center; gap:26px; margin-bottom:22px; flex-wrap:wrap; }
+.builder-result .ion-box{ text-align:center; font-family: var(--mono); }
+.builder-result .ion-box .f{ font-size:1.6rem; }
+.builder-result .ion-box .v{ font-size:.72rem; color: var(--chalk-faint); margin-top:4px; }
+.builder-result .swap-arrow{ font-size:1.4rem; color: var(--gold); }
+.builder-result .final-formula{
+  font-family: var(--mono); font-size: 2.3rem; color: var(--gold); letter-spacing:.02em;
+}
+.builder-result .final-name{ color: var(--chalk-dim); margin-top:8px; font-size:.9rem; }
+
+/* ============================================================
+   THEATRE SHELL (reused stage for stepper/visualizer sections)
+============================================================ */
+.theatre{
+  background: radial-gradient(ellipse at center, rgba(255,255,255,0.03), transparent 70%), var(--bg-2);
+  border:1px solid var(--line); border-radius: var(--radius);
+  padding: 30px; min-height: 260px;
+  display:flex; flex-direction:column; align-items:center; justify-content:center; gap:22px;
+  position:relative; overflow:hidden;
+}
+.theatre__stage{ width:100%; display:flex; align-items:center; justify-content:center; }
+.theatre__caption{
+  font-family: var(--mono); font-size:.85rem; color: var(--chalk-dim); text-align:center; min-height: 2.6em;
+}
+.theatre__caption b{ color: var(--gold); }
+.theatre__controls{ display:flex; gap:10px; flex-wrap:wrap; justify-content:center; }
+
+/* ============================================================
+   SUMMARY / BIG PICTURE
+============================================================ */
+.compare-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:18px; }
+@media (max-width: 860px){ .compare-grid{ grid-template-columns:1fr; } }
+.compare-card{ border-radius: var(--radius); padding:24px; border:1px solid var(--line); }
+.compare-card.ionic{ background: linear-gradient(160deg, rgba(232,114,74,0.12), var(--bg-2)); border-color: var(--coral-dim); }
+.compare-card.covalent{ background: linear-gradient(160deg, rgba(95,208,192,0.12), var(--bg-2)); border-color: var(--teal-dim); }
+.compare-card.metallic{ background: linear-gradient(160deg, rgba(90,169,219,0.12), var(--bg-2)); border-color: var(--blue-dim); }
+.compare-card h4{ font-size:1.2rem; margin-bottom:12px; }
+.compare-card.ionic h4{ color: var(--coral); }
+.compare-card.covalent h4{ color: var(--teal); }
+.compare-card.metallic h4{ color: var(--blue); }
+.compare-card ul{ margin:0; padding-left: 18px; color: var(--chalk-dim); font-size:.9rem; }
+.compare-card li{ margin-bottom:7px; }
+
+.mnemonic-box{
+  margin-top:34px; padding: 24px 28px; border-radius: var(--radius);
+  background: var(--bg-3); border:1px dashed var(--gold-dim); text-align:center;
+}
+.mnemonic-box .word{ font-family: var(--hand); font-size: 2rem; color: var(--gold); }
+.mnemonic-box p{ color: var(--chalk-dim); margin-top:8px; }
+
+.cheat-grid{ display:grid; grid-template-columns: repeat(3,1fr); gap:14px; margin-top:20px; }
+@media (max-width: 860px){ .cheat-grid{ grid-template-columns: 1fr 1fr; } }
+@media (max-width: 560px){ .cheat-grid{ grid-template-columns: 1fr; } }
+.cheat-card{ background: var(--bg-2); border:1px solid var(--line); border-radius:12px; padding:16px 18px; }
+.cheat-card .name{ font-size:.78rem; color: var(--chalk-dim); margin-bottom:6px; }
+.cheat-card .formula{ font-family: var(--mono); color: var(--teal); font-size:1.05rem; }
+
+/* ============================================================
+   MISC
+============================================================ */
+.divider-quote{
+  font-family: var(--serif); font-style:italic; font-size: clamp(1.3rem,3vw,1.9rem);
+  color: var(--chalk); text-align:center; max-width:780px; margin: 0 auto; line-height:1.5;
+}
+.divider-quote span{ color: var(--gold); }
+
+.key-term{ border-bottom: 1.5px dotted var(--gold-dim); cursor:help; }
+
+footer.site-footer{
+  padding: 50px 0 70px; text-align:center; color: var(--chalk-faint); font-family: var(--mono); font-size:.78rem;
+  border-top: 1px solid var(--line-soft);
+}
+footer.site-footer .hand{ font-family: var(--hand); color: var(--chalk-dim); font-size:1.3rem; display:block; margin-bottom:10px; }
+
+.sr-only{ position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); }
+
+.goal-card{
+  display:flex; gap:12px; align-items:flex-start;
+  background: var(--bg-2); border:1px solid var(--line); border-radius:12px;
+  padding: 16px 18px; font-size:.92rem; color: var(--chalk-dim);
+  transition: border-color .2s, transform .2s;
+}
+.goal-card:hover{ border-color: var(--gold-dim); transform: translateY(-2px); }
+.goal-card .tick{
+  flex:none; width:20px; height:20px; border-radius:6px; border:1.5px solid var(--teal-dim);
+  display:flex; align-items:center; justify-content:center; margin-top:2px;
+}
+.goal-card .tick svg{ width:11px; height:11px; }
+</style>
+</head>
+<body>
+<canvas id="chalkDust"></canvas>
+<div class="topProgress" id="topProgress"></div>
+<div class="railScrim" id="railScrim"></div>
+<button class="railToggle" id="railToggle" aria-label="Toggle contents"><span></span></button>
+
+<nav class="rail" id="rail" aria-label="Chapter contents">
+  <div class="rail__brand">✦ Chem 9–10 <small>CH. 06</small></div>
+  <div class="rail__scroll">
+    <a href="#objectives" class="rail__item" data-target="objectives"><span class="rail__box"></span>Chapter goals</a>
+    <a href="#mole" class="rail__item" data-target="mole"><span class="rail__box"></span>6.1 The mole</a>
+    <a href="#molvol" class="rail__item" data-target="molvol"><span class="rail__box"></span>6.1.1 Molar volume</a>
+    <a href="#molformula" class="rail__item" data-target="molformula"><span class="rail__box"></span>6.1.2 Mole &amp; formula</a>
+    <a href="#solution" class="rail__item" data-target="solution"><span class="rail__box"></span>6.1.3 Molar solution</a>
+    <a href="#percent" class="rail__item" data-target="percent"><span class="rail__box"></span>6.2 Percent composition</a>
+    <a href="#empirical" class="rail__item" data-target="empirical"><span class="rail__box"></span>6.2.1 Empirical formula</a>
+    <a href="#molecular" class="rail__item" data-target="molecular"><span class="rail__box"></span>6.2.2 Molecular formula</a>
+    <a href="#equations" class="rail__item" data-target="equations"><span class="rail__box"></span>6.3 Chemical equations</a>
+    <a href="#balancing" class="rail__item" data-target="balancing"><span class="rail__box"></span>6.3.1 Balancing</a>
+    <a href="#stoichiometry" class="rail__item" data-target="stoichiometry"><span class="rail__box"></span>6.3.2 Stoichiometry</a>
+    <a href="#limiting" class="rail__item" data-target="limiting"><span class="rail__box"></span>6.4 Limiting reactant</a>
+    <a href="#yield" class="rail__item" data-target="yield"><span class="rail__box"></span>6.5 Percent yield</a>
+    <a href="#lab" class="rail__item" data-target="lab"><span class="rail__box"></span>Lab experiments</a>
+    <a href="#summary" class="rail__item" data-target="summary"><span class="rail__box"></span>Big picture</a>
+  </div>
+</nav>
+
+<header class="hero" id="top">
+  <div class="hero__eyebrow">Chemistry · Class 9–10 · Chapter Six</div>
+  <h1 class="hero__title">How chemists<br>learn to <em>count</em></h1>
+  <p class="hero__tagline">a hands‑on tour of the mole, molar mass, solutions, formulas &amp; the arithmetic behind every chemical reaction</p>
+  <div class="hero__stage">
+    <svg viewBox="0 0 460 260" width="100%" aria-hidden="true">
+      <g font-family="IBM Plex Mono" text-anchor="middle" dominant-baseline="middle">
+        <circle cx="70" cy="130" r="46" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+        <text x="70" y="122" font-size="15" fill="var(--chalk-dim)">12</text>
+        <text x="70" y="144" font-size="10" fill="var(--chalk-faint)">O₂</text>
+        <text x="140" y="134" font-size="20" fill="var(--chalk-faint)">→</text>
+        <circle cx="210" cy="130" r="52" fill="none" stroke="var(--line)" stroke-width="1.5"/>
+        <text x="210" y="122" font-size="15" fill="var(--chalk-dim)">6.02×10²³</text>
+        <text x="210" y="146" font-size="10" fill="var(--chalk-faint)">particles</text>
+        <text x="288" y="134" font-size="20" fill="var(--chalk-faint)">=</text>
+        <circle cx="375" cy="130" r="62" fill="rgba(232,184,75,0.08)" stroke="var(--gold)" stroke-width="2"/>
+        <text x="375" y="120" font-size="22" fill="var(--gold)" font-weight="700">1</text>
+        <text x="375" y="146" font-size="13" fill="var(--gold)">mole</text>
+      </g>
+    </svg>
+  </div>
+  <div class="hero__scroll">scroll to explore<span class="chevron"></span></div>
+</header>
+
+<main>
+<section class="chapter-section" id="objectives">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow">Before we start</div>
+      <h2 class="sec-title">By the end of this chapter, you'll be able to</h2>
+      <p class="sec-lede">Chemical counting turns invisible atoms into numbers you can weigh on a balance. Here's everything that's about to click into place.</p>
+    </div>
+    <div class="grid-3 reveal" style="display:grid; grid-template-columns:repeat(3,1fr); gap:14px;">
+      <div class="goal-card"><span class="tick"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 11,1" fill="none" stroke="#45c7d6" stroke-width="2"/></svg></span>Do simple calculations using the concept of moles</div>
+      <div class="goal-card"><span class="tick"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 11,1" fill="none" stroke="#45c7d6" stroke-width="2"/></svg></span>Prepare solutions of a certain concentration</div>
+      <div class="goal-card"><span class="tick"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 11,1" fill="none" stroke="#45c7d6" stroke-width="2"/></svg></span>Determine the percent composition of elements in a compound</div>
+      <div class="goal-card"><span class="tick"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 11,1" fill="none" stroke="#45c7d6" stroke-width="2"/></svg></span>Determine empirical &amp; molecular formulas from percent composition</div>
+      <div class="goal-card"><span class="tick"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 11,1" fill="none" stroke="#45c7d6" stroke-width="2"/></svg></span>Write &amp; balance chemical equations using valency</div>
+      <div class="goal-card"><span class="tick"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 11,1" fill="none" stroke="#45c7d6" stroke-width="2"/></svg></span>Solve mass‑related problems using the stoichiometry of a reaction</div>
+      <div class="goal-card"><span class="tick"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 11,1" fill="none" stroke="#45c7d6" stroke-width="2"/></svg></span>Identify the limiting reactant &amp; calculate percentage yield</div>
+      <div class="goal-card"><span class="tick"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 11,1" fill="none" stroke="#45c7d6" stroke-width="2"/></svg></span>Calculate the percent composition of lattice water in copper sulphate</div>
+      <div class="goal-card"><span class="tick"><svg viewBox="0 0 12 10"><polyline points="1,5 4,8 11,1" fill="none" stroke="#45c7d6" stroke-width="2"/></svg></span>Measure chemical substances correctly using a balance</div>
+    </div>
+  </div>
+</section>
+<section class="chapter-section" id="mole">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="numeral">6.1</span> Foundations</div>
+      <h2 class="sec-title">The mole</h2>
+      <p class="sec-lede">A mole is just a counting word — exactly like "dozen" or "hundred" — except built for numbers too large for either to handle.</p>
+    </div>
+
+    <div class="prose reveal">
+      <p>You already count eggs by the dozen and sheets of paper by the ream. Atoms and molecules need a far bigger counting word, because even a speck of matter holds a staggering number of them.</p>
+    </div>
+
+    <div class="scale-row reveal">
+      <div class="scale-step"><div class="n">12</div><div class="lbl">= 1 dozen O₂</div></div>
+      <div class="scale-step"><div class="n">100</div><div class="lbl">= 1 hundred O₂</div></div>
+      <div class="scale-step"><div class="n">1,000</div><div class="lbl">= 1 thousand O₂</div></div>
+      <div class="scale-step"><div class="n">6.023 × 10²³</div><div class="lbl">= 1 mole O₂</div></div>
+    </div>
+
+    <div class="prose reveal">
+      <p>That number — <strong>6.02 × 10²³</strong> — is called <strong>Avogadro's number</strong>, and it works the same way regardless of what you're counting:</p>
+    </div>
+    <div class="fact-list reveal" style="max-width:600px;">
+      <div class="fact-item"><p>1 mole of <strong>atoms</strong> contains 6.02 × 10²³ atoms</p></div>
+      <div class="fact-item"><p>1 mole of <strong>molecules</strong> contains 6.02 × 10²³ molecules</p></div>
+      <div class="fact-item"><p>1 mole of <strong>ions</strong> contains 6.02 × 10²³ ions</p></div>
+    </div>
+    <div class="prose reveal">
+      <p>So the mole of a substance is simply <strong>the amount that contains Avogadro's number</strong> of its particles. Conveniently, that amount also has a very practical shortcut: <strong>the atomic or molecular mass expressed in grams is exactly 1 mole</strong> of that substance. 12 grams of carbon contains 6.02 × 10²³ carbon atoms — so 12 g of C = 1 mole of C.</p>
+    </div>
+
+    <div class="sec-head reveal" style="margin-top:44px;">
+      <h3 class="sec-title" style="font-size:1.4rem;">Finding the molecular mass of a molecule</h3>
+      <p class="sec-lede">Add up the atomic masses of every atom in the formula — that total, in grams, is one mole.</p>
+    </div>
+    <div class="grid-3 reveal">
+      <div class="panel">
+        <p style="font-family:var(--mono); color:var(--gold); font-size:.85rem; margin-bottom:10px;">Cl₂</p>
+        <p style="color:var(--chalk-dim); font-size:.88rem;">2 Cl atoms → 2 × 35.5 = <strong>71</strong><br>1 mole Cl₂ = 71 g</p>
+      </div>
+      <div class="panel">
+        <p style="font-family:var(--mono); color:var(--gold); font-size:.85rem; margin-bottom:10px;">NaCl</p>
+        <p style="color:var(--chalk-dim); font-size:.88rem;">Na + Cl → 23 + 35.5 = <strong>58.5</strong><br>1 mole NaCl = 58.5 g</p>
+      </div>
+      <div class="panel">
+        <p style="font-family:var(--mono); color:var(--gold); font-size:.85rem; margin-bottom:10px;">CuSO₄·5H₂O</p>
+        <p style="color:var(--chalk-dim); font-size:.88rem;">Cu+S+9O+10H → 63.5+32+144+10 = <strong>249.5</strong><br>1 mole = 249.5 g</p>
+      </div>
+    </div>
+
+    <div class="panel reveal" style="margin-top:36px;">
+      <p style="font-family:var(--mono); font-size:.78rem; color:var(--chalk-faint); text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px;">Interactive · the mole converter</p>
+      <p class="prose" style="color:var(--chalk-dim); font-size:.94rem; max-width:640px; margin-bottom:20px;">Pick a substance (or type any molar mass), tell it what number you've got, and watch mass, moles and particle count fall into place together.</p>
+      <div class="chip-row" id="moleCompoundChips" style="margin-top:0;"></div>
+      <div class="converter">
+        <div class="converter__field is-hub">
+          <label>Custom molar mass (only if "custom" is selected above)</label>
+          <input type="number" id="moleCustomMass" value="18" step="any" min="0.0001">
+          <span class="unit">grams per mole</span>
+        </div>
+        <div class="converter__field">
+          <label>I know the amount is</label>
+          <input type="number" id="moleAmount" value="5" step="any" min="0">
+        </div>
+        <div class="converter__field">
+          <label>…and that number represents</label>
+          <select id="moleRepresents">
+            <option value="mass">Mass in grams</option>
+            <option value="moles">Moles</option>
+            <option value="particles">Number of particles</option>
+          </select>
+        </div>
+      </div>
+      <div class="solver-result" id="moleConverterResult"></div>
+    </div>
+
+    <div class="callout-row reveal" style="margin-top:34px;">
+      <div class="aside">
+        <span class="aside__label">Worked example</span>
+        <p>Mass of one H₂O molecule: 1 mole H₂O = 18 g = 6.023×10²³ molecules, so one molecule weighs 18 ÷ 6.023×10²³ = <strong>2.99 × 10⁻²³ g</strong>.</p>
+      </div>
+      <div class="aside">
+        <span class="aside__label">Worked example</span>
+        <p>Molecules in 1 g H₂SO₄: 98 g H₂SO₄ = 6.023×10²³ molecules, so 1 g contains 6.023×10²³ ÷ 98 = <strong>6.14 × 10²¹ molecules</strong>.</p>
+      </div>
+    </div>
+    <div class="aside reveal">
+      <span class="aside__label">Try it yourself</span>
+      <p>Use the converter above to check: 5 g of H₂O should come out to <strong>0.277 mole</strong>. Then switch the compound to H₂SO₄ and find how many H, S and O atoms are in 1 g of it — remember each molecule contributes 2 H, 1 S and 4 O atoms.</p>
+    </div>
+  </div>
+</section>
+<section class="chapter-section" id="molvol">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="numeral">6.1.1</span> Foundations</div>
+      <h2 class="sec-title">Molar volume of a gas</h2>
+      <p class="sec-lede">For gases, the mole gives you something extra: a fixed volume, regardless of what the gas actually is.</p>
+    </div>
+
+    <div class="prose reveal">
+      <p>At <strong>standard temperature and pressure</strong> (0°C and 1 atm — often shortened to STP), <strong>1 mole of any gas occupies exactly 22.4 litres</strong>. It doesn't matter whether it's CO₂, H₂, or NH₃ — same mole, same volume.</p>
+    </div>
+
+    <div class="grid-3 reveal">
+      <div class="panel" style="text-align:center;">
+        <div style="font-family:var(--mono); color:var(--chalk-dim); font-size:.8rem;">n = w / M</div>
+        <div style="color:var(--chalk-faint); font-size:.75rem; margin-top:6px;">moles from mass</div>
+      </div>
+      <div class="panel" style="text-align:center;">
+        <div style="font-family:var(--mono); color:var(--chalk-dim); font-size:.8rem;">n = V / 22.4</div>
+        <div style="color:var(--chalk-faint); font-size:.75rem; margin-top:6px;">moles from volume at STP</div>
+      </div>
+      <div class="panel" style="text-align:center;">
+        <div style="font-family:var(--mono); color:var(--chalk-dim); font-size:.8rem;">n = N / 6.023×10²³</div>
+        <div style="color:var(--chalk-faint); font-size:.75rem; margin-top:6px;">moles from particle count</div>
+      </div>
+    </div>
+
+    <div class="panel reveal" style="margin-top:32px;">
+      <p style="font-family:var(--mono); font-size:.78rem; color:var(--chalk-faint); text-transform:uppercase; letter-spacing:.08em; margin-bottom:4px;">Interactive · gas mole converter</p>
+      <p class="prose" style="color:var(--chalk-dim); font-size:.94rem; max-width:640px; margin-bottom:20px;">Same converter as before, now with a fourth mode — volume at standard conditions.</p>
+      <div class="chip-row" id="gasCompoundChips" style="margin-top:0;"></div>
+      <div class="converter">
+        <div class="converter__field is-hub">
+          <label>Custom molar mass (only if "custom" is selected above)</label>
+          <input type="number" id="gasCustomMass" value="44" step="any" min="0.0001">
+          <span class="unit">grams per mole</span>
+        </div>
+        <div class="converter__field">
+          <label>I know the amount is</label>
+          <input type="number" id="gasAmount" value="1" step="any" min="0">
+        </div>
+        <div class="converter__field">
+          <label>…and that number represents</label>
+          <select id="gasRepresents">
+            <option value="mass">Mass in grams</option>
+            <option value="moles">Moles</option>
+            <option value="particles">Number of molecules</option>
+            <option value="volume">Volume in litres (STP)</option>
+          </select>
+        </div>
+      </div>
+      <div class="solver-result" id="gasConverterResult"></div>
+    </div>
+
+    <div class="callout-row reveal" style="margin-top:34px;">
+      <div class="aside">
+        <span class="aside__label">Worked example</span>
+        <p>1 litre of CO₂ at STP: 22.4 L = 6.023×10²³ molecules, so 1 L contains 6.023×10²³ ÷ 22.4 = <strong>2.69 × 10²² molecules</strong>.</p>
+      </div>
+      <div class="aside">
+        <span class="aside__label">Worked example</span>
+        <p>Volume of 10 g H₂ gas at STP: n = 10 ÷ 2 = 5 mol, so V = 5 × 22.4 = <strong>112 litres</strong>.</p>
+      </div>
+    </div>
+    <div class="aside reveal">
+      <span class="aside__label">Try it yourself</span>
+      <p>Set the converter to CH₄, choose "volume", type 5 — that's 5 litres of methane at STP. Each CH₄ molecule has 4 H atoms, so multiply the molecule count by 4 to answer: how many H atoms are in 5 L of CH₄?</p>
+    </div>
+  </div>
+</section>
+<section class="chapter-section" id="molformula">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="numeral">6.1.2</span> Foundations</div>
+      <h2 class="sec-title">Mole &amp; molecular formula</h2>
+      <p class="sec-lede">A molecular formula is more generous than it looks — one small formula like H₂O quietly encodes seven separate facts.</p>
+    </div>
+    <div class="prose reveal">
+      <p>The gram amount you get from expressing a molecular mass in grams is exactly 1 mole of that substance. Water's molecular formula is H₂O with molecular mass 18 — so 18 grams is "1 gram-molecular-mass of water," or simply 1 mole of water. Unpack that one formula and here's everything it's telling you at once:</p>
+    </div>
+    <div class="fact-list reveal">
+      <div class="fact-item"><p>H₂O <strong>is water.</strong></p></div>
+      <div class="fact-item"><p>The formula of <strong>1 molecule</strong> of water is H₂O.</p></div>
+      <div class="fact-item"><p>The formula of <strong>1 mole</strong> of water is H₂O.</p></div>
+      <div class="fact-item"><p>1 molecule of H₂O contains <strong>2 hydrogen atoms and 1 oxygen atom.</strong></p></div>
+      <div class="fact-item"><p>1 mole of H₂O contains <strong>2 mole hydrogen atoms and 1 mole oxygen atoms.</strong></p></div>
+      <div class="fact-item"><p>In 1 mole of H₂O, the H atoms weigh 1×2 = 2 g and the O atom weighs 16×1 = 16 g — total mass = <strong>18 g.</strong></p></div>
+      <div class="fact-item"><p>In 1 mole of H₂O: <strong>1.204×10²⁴</strong> H atoms (6.023×10²³×2), <strong>6.023×10²³</strong> O atoms, and <strong>6.023×10²³</strong> H₂O molecules.</p></div>
+    </div>
+  </div>
+</section>
+<section class="chapter-section" id="solution">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="numeral">6.1.3</span> Foundations</div>
+      <h2 class="sec-title">Molar solution</h2>
+      <p class="sec-lede">Dissolve a solute in a solvent and you get a solution. How much you dissolve — measured against the mole — is what molarity means.</p>
+    </div>
+
+    <div class="prose reveal">
+      <p>Half a glass of water plus a spoon of salt, stirred until the salt disappears: that's a <strong>solution</strong>, with water as the <strong>solvent</strong> and salt as the <strong>solute</strong>.</p>
+      <p style="text-align:center; font-family:var(--mono); color:var(--gold); margin: 18px 0;">Solution = Solute + Solvent</p>
+      <p>"Dilute" and "concentrated" only make sense <em>relative to each other</em> — there's no fixed line between them. More solute in the same solvent (or the same solute in less solvent) always shifts a solution toward "concentrated."</p>
+    </div>
+
+    <div class="panel reveal beaker-demo">
+      <svg viewBox="0 0 160 200" width="160" height="200">
+        <path d="M45,20 L45,90 L20,175 Q20,185 30,185 L130,185 Q140,185 140,175 L115,90 L115,20" class="beaker-glass"/>
+        <line x1="40" y1="20" x2="120" y2="20" stroke="var(--chalk-faint)" stroke-width="2"/>
+        <g id="beakerDots"></g>
+      </svg>
+      <div>
+        <div class="range-row">
+          <input type="range" id="beakerSlider" min="2" max="34" value="6">
+          <span class="range-label" id="beakerLabel">dilute</span>
+        </div>
+        <p style="color:var(--chalk-dim); font-size:.88rem; margin-top:14px;">Drag the slider to add more solute to the same amount of solvent — watch the label shift from dilute toward concentrated. There's no fixed cutoff between the two; it's always a comparison.</p>
+      </div>
+    </div>
+
+    <div class="prose reveal" style="margin-top:10px;">
+      <p>The number of moles of solute dissolved in <strong>every litre</strong> of solution is called the <strong>molarity</strong>. Dissolve 2 moles in 1 litre and you have a 2‑molar solution. Two special cases get their own names: 0.5 mole/litre is a <strong>semimolar</strong> solution, and 0.1 mole/litre is a <strong>decimolar</strong> solution.</p>
+    </div>
+
+    <div class="sec-head reveal" style="margin-top:20px;">
+      <h3 class="sec-title" style="font-size:1.35rem;">Preparing a solution of a given molarity</h3>
+    </div>
+    <div class="procedure-list reveal">
+      <div class="procedure-item"><p>Select a <strong>volumetric flask</strong> of the volume you need.</p></div>
+      <div class="procedure-item"><p><strong>Weigh</strong> the exact mass of solute the calculation calls for.</p></div>
+      <div class="procedure-item"><p>Add some water and <strong>shake</strong> the flask until it fully dissolves.</p></div>
+      <div class="procedure-item"><p><strong>Top up with water</strong> to the calibration mark on the flask.</p></div>
+    </div>
+
+    <div class="prose reveal">
+      <p>One equation ties mass, molarity, volume and molar mass together:</p>
+      <p style="text-align:center; font-family:var(--mono); color:var(--gold); font-size:1.3rem; margin:18px 0;">w = (S × V × M) / 1000</p>
+      <p style="text-align:center; color:var(--chalk-dim); font-size:.88rem;">w = mass of solute (g) &nbsp;·&nbsp; S = molarity &nbsp;·&nbsp; V = volume (mL) &nbsp;·&nbsp; M = molar mass (g/mol)</p>
+    </div>
+
+    <div class="panel reveal" style="margin-top:30px;">
+      <p style="font-family:var(--mono); font-size:.78rem; color:var(--chalk-faint); text-transform:uppercase; letter-spacing:.08em; margin-bottom:16px;">Interactive · molarity solver</p>
+      <div class="solver-toggle" id="molaritySolveFor">
+        <button class="chip is-active" data-solve="w">Solve for mass (w)</button>
+        <button class="chip" data-solve="S">Solve for molarity (S)</button>
+        <button class="chip" data-solve="V">Solve for volume (V)</button>
+        <button class="chip" data-solve="M">Solve for molar mass (M)</button>
+      </div>
+      <div class="solver-grid">
+        <div class="solver-field" id="fieldW"><label>Mass, w (grams)</label><input type="number" id="inputW" value="" placeholder="?"></div>
+        <div class="solver-field" id="fieldS"><label>Molarity, S (mol/L)</label><input type="number" id="inputS" value="0.2" step="any"></div>
+        <div class="solver-field" id="fieldV"><label>Volume, V (mL)</label><input type="number" id="inputV" value="250" step="any"></div>
+        <div class="solver-field" id="fieldM"><label>Molar mass, M (g/mol)</label><input type="number" id="inputM" value="58.5" step="any"></div>
+      </div>
+      <div class="solver-result" id="molarityResult"></div>
+    </div>
+
+    <div class="callout-row reveal" style="margin-top:34px;">
+      <div class="aside">
+        <span class="aside__label">Matches the book</span>
+        <p>0.2 molar NaCl in a 250 mL flask needs 2.925 g NaCl — try it: S=0.2, V=250, M=58.5.</p>
+      </div>
+      <div class="aside">
+        <span class="aside__label">Try the individual tasks</span>
+        <p>Switch to "Solve for molarity" and enter w=4, V=100, M=40 for NaOH — then M=36.5 for HCl. Compare the two molarities you get.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="chapter-section" id="percent">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="numeral">6.2</span> Composition</div>
+      <h2 class="sec-title">Percent composition of elements</h2>
+      <p class="sec-lede">How many grams of each element hide inside 100 grams of a compound — read straight off its formula.</p>
+    </div>
+
+    <div class="prose reveal">
+      <p style="text-align:center; font-family:var(--mono); color:var(--gold); font-size:1.05rem; margin:14px 0;">% composition = (atomic mass × number of atoms × 100) / molecular mass</p>
+    </div>
+    <div class="prose reveal">
+      <p>Take HCl (molecular mass 36.5): 1 g of it holds 1/36.5 g of H, so 100 g holds (1×100)/36.5 = <strong>2.74% H</strong> — leaving <strong>97.26% Cl</strong> to make up the rest.</p>
+    </div>
+
+    <div class="panel reveal" style="margin-top:26px;">
+      <p style="font-family:var(--mono); font-size:.78rem; color:var(--chalk-faint); text-transform:uppercase; letter-spacing:.08em; margin-bottom:16px;">Interactive · percent composition</p>
+      <div class="chip-row" id="percentChips" style="margin-top:0;"></div>
+      <div class="bar-chart" id="percentBarChart" style="margin-top:20px;"></div>
+      <p id="percentFormulaLabel" style="text-align:center; font-family:var(--mono); color:var(--chalk-dim); font-size:.85rem; margin-top:16px;"></p>
+    </div>
+
+    <div class="grid-3 reveal" style="margin-top:30px;">
+      <div class="panel"><p style="font-family:var(--mono); color:var(--gold); font-size:.85rem;">H₂O</p><p style="color:var(--chalk-dim); font-size:.86rem; margin-top:8px;">H: 11.11% · O: 88.89%</p></div>
+      <div class="panel"><p style="font-family:var(--mono); color:var(--gold); font-size:.85rem;">H₂SO₄</p><p style="color:var(--chalk-dim); font-size:.86rem; margin-top:8px;">H: 2.04% · S: 32.65% · O: 65.3%</p></div>
+      <div class="panel"><p style="font-family:var(--mono); color:var(--gold); font-size:.85rem;">Al₂(SO₄)₃</p><p style="color:var(--chalk-dim); font-size:.86rem; margin-top:8px;">Al: 15.78% · S: 28.07% · O: 56.14%</p></div>
+    </div>
+
+    <div class="aside reveal">
+      <span class="aside__label">Do it yourself</span>
+      <p>Pick NaCl in the tool above and check the percent composition of Na and Cl for yourself.</p>
+    </div>
+  </div>
+</section>
+<section class="chapter-section" id="empirical">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="numeral">6.2.1</span> Composition</div>
+      <h2 class="sec-title">From percent composition to empirical formula</h2>
+      <p class="sec-lede">A molecular formula counts every atom. An <strong>empirical formula</strong> only keeps the simplest ratio between them — H₂O₂ (hydrogen peroxide) reduces all the way down to HO.</p>
+    </div>
+
+    <div class="grid-2 reveal">
+      <div class="panel">
+        <p class="numeral" style="margin-bottom:10px;">STEP 1</p>
+        <p style="color:var(--chalk-dim); font-size:.9rem;">Divide each element's percent composition by its atomic mass.</p>
+      </div>
+      <div class="panel">
+        <p class="numeral" style="margin-bottom:10px;">STEP 2</p>
+        <p style="color:var(--chalk-dim); font-size:.9rem;">Divide every quotient by the smallest one among them.</p>
+      </div>
+      <div class="panel">
+        <p class="numeral" style="margin-bottom:10px;">STEP 3</p>
+        <p style="color:var(--chalk-dim); font-size:.9rem;">If needed, scale all results up to the nearest whole numbers.</p>
+      </div>
+      <div class="panel">
+        <p class="numeral" style="margin-bottom:10px;">STEP 4</p>
+        <p style="color:var(--chalk-dim); font-size:.9rem;">Write those whole numbers as subscripts — skip writing a "1".</p>
+      </div>
+    </div>
+
+    <div class="panel reveal" style="margin-top:30px;">
+      <p style="font-family:var(--mono); font-size:.78rem; color:var(--chalk-faint); text-transform:uppercase; letter-spacing:.08em; margin-bottom:16px;">Interactive · walk through the steps</p>
+      <div class="chip-row" id="empiricalChips" style="margin-top:0;"></div>
+      <div class="stepper">
+        <div class="stepper__dots" id="empiricalDots"></div>
+        <div class="stepper__body">
+          <div class="stepper__title" id="empiricalStepTitle"></div>
+          <div class="stepper__content" id="empiricalStepContent"></div>
+        </div>
+        <div class="stepper__controls">
+          <button class="btn btn--ghost" id="empiricalPrev">← Back</button>
+          <button class="btn" id="empiricalNext">Next step →</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="aside reveal">
+      <span class="aside__label">Do it yourself</span>
+      <p>An experiment shows a compound made of 3 g carbon and 8 g oxygen. Pick "3g C + 8g O" above and step through it — the ratio comes out even cleaner than you'd expect.</p>
+    </div>
+  </div>
+</section>
+<section class="chapter-section" id="molecular">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="numeral">6.2.2</span> Composition</div>
+      <h2 class="sec-title">From empirical to molecular formula</h2>
+      <p class="sec-lede">The empirical formula only gives a ratio. Multiply it by the right whole number and it becomes the true molecular formula.</p>
+    </div>
+
+    <div class="prose reveal">
+      <p>If the molecular mass is <strong>n</strong> times heavier than the empirical formula's own mass, then:</p>
+      <p style="text-align:center; font-family:var(--mono); color:var(--gold); font-size:1.15rem; margin:16px 0;">Molecular Formula = (Empirical Formula)ₙ &nbsp;&nbsp;where&nbsp;&nbsp; n = Molecular Mass ÷ Empirical Formula Mass</p>
+    </div>
+
+    <div class="panel reveal">
+      <p style="font-family:var(--mono); font-size:.78rem; color:var(--chalk-faint); text-transform:uppercase; letter-spacing:.08em; margin-bottom:16px;">Interactive · empirical formula mass = 13, molecular mass = 78</p>
+      <div class="solver-grid" style="grid-template-columns:repeat(3,1fr);">
+        <div class="solver-field"><label>Empirical formula</label><input type="text" id="molecEmpirical" value="CH" disabled></div>
+        <div class="solver-field"><label>Empirical formula mass</label><input type="number" id="molecEmpMass" value="13"></div>
+        <div class="solver-field"><label>Molecular mass</label><input type="number" id="molecMolMass" value="78"></div>
+      </div>
+      <div class="solver-result" id="molecResult"></div>
+    </div>
+
+    <div class="prose reveal" style="margin-top:20px;">
+      <p>Sometimes empirical and molecular formulas are identical — water is H₂O either way, and sulfuric acid is H₂SO₄ either way. But whenever every atom count in a molecular formula shares a common factor, the two formulas split apart:</p>
+    </div>
+    <div class="grid-3 reveal">
+      <div class="panel" style="text-align:center;"><p style="font-family:var(--mono); color:var(--chalk-dim); font-size:.85rem;">Glucose</p><p style="font-family:var(--mono); color:var(--gold); margin-top:8px;">C₆H₁₂O₆ → CH₂O</p></div>
+      <div class="panel" style="text-align:center;"><p style="font-family:var(--mono); color:var(--chalk-dim); font-size:.85rem;">Benzene</p><p style="font-family:var(--mono); color:var(--gold); margin-top:8px;">C₆H₆ → CH</p></div>
+      <div class="panel" style="text-align:center;"><p style="font-family:var(--mono); color:var(--chalk-dim); font-size:.85rem;">Ethene</p><p style="font-family:var(--mono); color:var(--gold); margin-top:8px;">C₂H₄ → CH₂</p></div>
+    </div>
+  </div>
+</section>
+<section class="chapter-section" id="equations">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="numeral">6.3</span> Reactions</div>
+      <h2 class="sec-title">Chemical reactions &amp; chemical equations</h2>
+      <p class="sec-lede">A chemical change swaps a substance's properties for a completely new set. The equation is just the shorthand for that swap.</p>
+    </div>
+
+    <div class="prose reveal">
+      <p>The starting substances are <strong>reactants</strong>; whatever forms by the end is a <strong>product</strong>. A chemical equation writes reactants on the left, products on the right, and connects them with an arrow (→) or an equals sign (=) once balanced.</p>
+    </div>
+
+    <div class="exp-grid reveal">
+      <div class="exp-card"><h5>1 · Sides</h5><p style="color:var(--chalk-dim); font-size:.88rem;">Reactants on the left, products on the right, separated by → or =.</p></div>
+      <div class="exp-card"><h5>2 · Multiple substances</h5><p style="color:var(--chalk-dim); font-size:.88rem;">More than one reactant or product? Join them with a plus sign.</p></div>
+      <div class="exp-card"><h5>3 · Balance</h5><p style="color:var(--chalk-dim); font-size:.88rem;">Every element needs the same atom count on both sides — that's "balancing."</p></div>
+      <div class="exp-card"><h5>4 · Unbalanced is OK sometimes</h5><p style="color:var(--chalk-dim); font-size:.88rem;">If balancing isn't the point, an arrow alone is fine without full balancing.</p></div>
+      <div class="exp-card"><h5>5 · Physical states</h5><p style="color:var(--chalk-dim); font-size:.88rem;">(s) solid · (l) liquid · (g) gas · (aq) dissolved in water — written right after each formula.</p></div>
+      <div class="exp-card"><h5>6 · Heat energy</h5><p style="color:var(--chalk-dim); font-size:.88rem;">To show heat produced or absorbed, the equation must be fully balanced with states included.</p></div>
+    </div>
+
+    <div class="prose reveal" style="margin-top:10px;">
+      <p style="font-family:var(--mono); text-align:center; color:var(--chalk); background:var(--bg-2); border:1px solid var(--line); border-radius:10px; padding:14px; font-size:.95rem;">2H₂(g) + O₂(g) → 2H₂O(l)</p>
+      <p style="font-family:var(--mono); text-align:center; color:var(--chalk); background:var(--bg-2); border:1px solid var(--line); border-radius:10px; padding:14px; font-size:.95rem;">C(s) + O₂(g) → CO₂(g)</p>
+      <p style="font-family:var(--mono); text-align:center; color:var(--chalk); background:var(--bg-2); border:1px solid var(--line); border-radius:10px; padding:14px; font-size:.9rem;">CaCO₃(s) + 2HCl(aq) → CaCl₂(aq) + CO₂(g) + H₂O(l)</p>
+    </div>
+
+    <div class="aside reveal">
+      <span class="aside__label">When heat is involved</span>
+      <p>A small delta (Δ) above the arrow means heat was applied. Heating solid magnesium nitrate: <span style="font-family:var(--mono); color:var(--gold);">2Mg(NO₃)₂(s) →(Δ) 2MgO(s) + 4NO₂(g) + O₂(g)</span></p>
+    </div>
+  </div>
+</section>
+<section class="chapter-section" id="balancing">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="numeral">6.3.1</span> Reactions</div>
+      <h2 class="sec-title">Balancing chemical equations</h2>
+      <p class="sec-lede">Reactants and products are different substances built from the very same atoms — so the count of every element must match on both sides. Multiply formulas by whole numbers until it does.</p>
+    </div>
+
+    <div class="prose reveal">
+      <p>There's no fixed recipe, but a few habits help: write correct formulas first, balance compound substances before lone elements, and keep adjusting coefficients — never subscripts — until every element checks out.</p>
+    </div>
+
+    <div class="chip-row reveal" id="balanceTabs">
+      <button class="chip is-active" data-reaction="mg">Mg + HCl → MgCl₂ + H₂</button>
+      <button class="chip" data-reaction="na2co3">Na₂CO₃ + HCl → NaCl + H₂O + CO₂</button>
+      <button class="chip" data-reaction="al2o3">Al₂O₃ + HCl → AlCl₃ + H₂O</button>
+    </div>
+
+    <div class="theatre reveal">
+      <div class="stepper__dots" id="balanceDots"></div>
+      <div class="theatre__stage"><div class="eq-display" id="balanceEq"></div></div>
+      <div class="tally" id="balanceTally"></div>
+      <div class="theatre__caption" id="balanceCaption"></div>
+      <div class="theatre__controls">
+        <button class="btn btn--ghost" id="balancePrev">← Back</button>
+        <button class="btn" id="balanceNext">Next step →</button>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="chapter-section" id="stoichiometry">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="numeral">6.3.2</span> Reactions</div>
+      <h2 class="sec-title">Mole &amp; chemical equation — stoichiometry</h2>
+      <p class="sec-lede">A balanced equation is secretly a recipe: it tells you exactly how many moles (and grams) of each reactant combine to give exactly how many moles of product.</p>
+    </div>
+
+    <div class="prose reveal">
+      <p>The branch of chemistry that turns a balanced equation into these mass/mole predictions is called <strong>stoichiometry</strong>. Here's the full breakdown for magnesium burning in oxygen:</p>
+    </div>
+
+    <div class="table-wrap reveal">
+      <table class="data-table">
+        <thead><tr><th></th><th>2Mg(s)</th><th>+ O₂(g)</th><th>→ 2MgO(s)</th></tr></thead>
+        <tbody>
+          <tr><td>Moles</td><td class="mono">2 mol Mg</td><td class="mono">1 mol O₂</td><td class="mono">2 mol MgO</td></tr>
+          <tr><td>Particles</td><td class="mono">2×6.023×10²³ atoms</td><td class="mono">6.023×10²³ molecules</td><td class="mono">2×6.023×10²³ molecules</td></tr>
+          <tr><td>Mass</td><td class="mono">2×24 = 48 g</td><td class="mono">1×32 = 32 g</td><td class="mono">2×40 = 80 g</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="panel reveal" style="margin-top:30px;">
+      <p style="font-family:var(--mono); font-size:.78rem; color:var(--chalk-faint); text-transform:uppercase; letter-spacing:.08em; margin-bottom:16px;">Interactive · stoichiometry calculator</p>
+      <div class="chip-row" id="stoichReactionChips" style="margin-top:0;"></div>
+      <div class="solver-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="solver-field">
+          <label>Known substance</label>
+          <select id="stoichKnownSpecies"></select>
+        </div>
+        <div class="solver-field">
+          <label>Its mass (grams)</label>
+          <input type="number" id="stoichKnownMass" value="5" step="any" min="0">
+        </div>
+      </div>
+      <div class="table-wrap" style="margin-top:20px;">
+        <table class="data-table" id="stoichTable"></table>
+      </div>
+    </div>
+
+    <div class="callout-row reveal" style="margin-top:34px;">
+      <div class="aside">
+        <span class="aside__label">Matches the book</span>
+        <p>5 g Mg needs 3.33 g O₂ · 2 g Mg produces 3.33 g MgO · 10 g MgO needs 4 g O₂ — all reproducible above by switching the known substance.</p>
+      </div>
+      <div class="aside">
+        <span class="aside__label">Try it yourself</span>
+        <p>Switch the reaction to N₂ + 3H₂ → 2NH₃, set N₂ to 140 g (5 mol worth), and read off how many moles of NH₃ that produces.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="chapter-section" id="limiting">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="numeral">6.4</span> Reactions</div>
+      <h2 class="sec-title">Limiting reactant</h2>
+      <p class="sec-lede">Reactants rarely arrive in exactly the right proportion. Whichever one runs out first cuts the reaction short — everything else is measured against it.</p>
+    </div>
+    <div class="prose reveal">
+      <p>The reactant that's completely used up is called the <strong>limiting reactant</strong>. It alone decides how much product forms, how much of the other reactant reacts, and how much of that other reactant is left over.</p>
+    </div>
+
+    <div class="panel reveal" style="margin-top:26px;">
+      <p style="font-family:var(--mono); font-size:.78rem; color:var(--chalk-faint); text-transform:uppercase; letter-spacing:.08em; margin-bottom:16px;">Interactive · 2Mg + O₂ → 2MgO (by particle count)</p>
+      <div class="solver-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="solver-field"><label>Mg atoms</label><input type="number" id="limitMg" value="4" min="0" step="1"></div>
+        <div class="solver-field"><label>O₂ molecules</label><input type="number" id="limitO2" value="4" min="0" step="1"></div>
+      </div>
+      <div class="particle-stage">
+        <div class="particle-grid" id="limitGrid"></div>
+        <div class="legend-row">
+          <span><span class="legend-dot" style="background:var(--coral);"></span>Mg atom</span>
+          <span><span class="legend-dot" style="background:var(--blue);"></span>O₂ molecule</span>
+          <span>faded = left over</span>
+        </div>
+      </div>
+      <div class="solver-result" id="limitResult"></div>
+    </div>
+
+    <div class="callout-row reveal" style="margin-top:30px;">
+      <div class="aside">
+        <span class="aside__label">Matches the book</span>
+        <p>4 Mg + 4 O₂ → magnesium runs out first (needs only 2 O₂), leaving 2 O₂ molecules over. Try 70 Mg + 30 O₂ next — now oxygen is the one that runs out.</p>
+      </div>
+      <div class="aside">
+        <span class="aside__label">By mass instead</span>
+        <p>75 g Cl₂ mixed with 5 g H₂ (H₂ + Cl₂ → 2HCl): 5 g H₂ would need 177.5 g Cl₂ to react completely, but only 75 g Cl₂ is available — so <strong>chlorine is the limiting reactant</strong> here, and hydrogen is left over.</p>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="chapter-section" id="yield">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow"><span class="numeral">6.5</span> Reactions</div>
+      <h2 class="sec-title">Percentage of yield</h2>
+      <p class="sec-lede">Real reactants are rarely 100% pure, and real purification is never perfect — so real yields almost always fall short of the calculated maximum.</p>
+    </div>
+    <div class="prose reveal">
+      <p>The purest lab-grade substances, called <strong>Analar</strong>, are still only about 99% pure. Whatever the reason, the actual product collected is compared against the theoretical amount stoichiometry predicts:</p>
+      <p style="text-align:center; font-family:var(--mono); color:var(--gold); font-size:1.1rem; margin:16px 0;">% yield = (actual amount obtained ÷ calculated amount) × 100</p>
+    </div>
+
+    <div class="panel reveal">
+      <p style="font-family:var(--mono); font-size:.78rem; color:var(--chalk-faint); text-transform:uppercase; letter-spacing:.08em; margin-bottom:16px;">Interactive · percent yield calculator</p>
+      <div class="solver-grid" style="grid-template-columns:1fr 1fr;">
+        <div class="solver-field"><label>Calculated (theoretical) amount</label><input type="number" id="yieldTheoretical" value="3.33" step="any" min="0"></div>
+        <div class="solver-field"><label>Actual amount obtained</label><input type="number" id="yieldActual" value="3.25" step="any" min="0"></div>
+      </div>
+      <div class="solver-result" id="yieldResult"></div>
+    </div>
+
+    <div class="aside reveal">
+      <span class="aside__label">Do it yourself</span>
+      <p>Heating 80 g CaCO₃ yields 39 g CaO. First work out the theoretical yield (CaCO₃ → CaO + CO₂, molar masses 100 and 56), then plug both numbers into the calculator above.</p>
+    </div>
+  </div>
+</section>
+<section class="chapter-section" id="lab">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow">Hands‑on</div>
+      <h2 class="sec-title">Two lab experiments</h2>
+      <p class="sec-lede">The theory above is exactly what happens on a bench with a flask, a balance, and a Bunsen burner.</p>
+    </div>
+
+    <div class="panel reveal">
+      <h4 style="font-size:1.15rem; margin-bottom:6px;">Experiment 1 · Preparing 0.1 molar Na₂CO₃ solution (250 mL)</h4>
+      <p style="color:var(--chalk-dim); font-size:.9rem; margin-bottom:14px;"><strong>Principle:</strong> sodium carbonate is a primary standard — pure, dry, stable, and easy to weigh directly — which makes it ideal for practising molar solution prep.</p>
+      <div class="materials-row">
+        <span class="material-chip">250 mL volumetric flask</span>
+        <span class="material-chip">Funnel</span>
+        <span class="material-chip">Weighing bottle</span>
+        <span class="material-chip">Chemical balance</span>
+        <span class="material-chip">Wash bottle</span>
+        <span class="material-chip">Pure Na₂CO₃</span>
+      </div>
+      <div class="procedure-list">
+        <div class="procedure-item"><p>Insert a funnel into a clean 250 mL volumetric flask.</p></div>
+        <div class="procedure-item"><p>Weigh a dry weighing bottle on the chemical balance.</p></div>
+        <div class="procedure-item"><p>Add sodium carbonate until the bottle is exactly 2.65 g heavier than before (from w = SVM/1000, with S=0.1, V=250, M=106).</p></div>
+        <div class="procedure-item"><p>Tip the sodium carbonate from the weighing bottle into the flask through the funnel.</p></div>
+        <div class="procedure-item"><p>Add distilled water slowly; swirl to dissolve fully, then top up exactly to the 250 mL mark.</p></div>
+      </div>
+      <div class="caution-box"><b>Caution:</b> use only dry, pure sodium carbonate, keep the weighing bottle dry, and add distilled water only.</div>
+      <p class="prose" style="margin-top:16px; color:var(--chalk-dim); font-size:.88rem;">Need the calculation for a different molarity or volume? Head back up to the <a href="#solution">molarity solver</a> and try your own numbers.</p>
+    </div>
+
+    <div class="panel reveal" style="margin-top:26px;">
+      <h4 style="font-size:1.15rem; margin-bottom:6px;">Experiment 2 · Percent composition of lattice water in blue vitriol</h4>
+      <p style="color:var(--chalk-dim); font-size:.9rem; margin-bottom:14px;"><strong>Principle:</strong> blue vitriol (CuSO₄·5H₂O) is copper sulphate locked together with 5 moles of "crystal water." Heat drives that water off as vapour and the crystal turns from blue to white.</p>
+      <p style="text-align:center; font-family:var(--mono); color:var(--gold); background:var(--bg-2); border:1px solid var(--line); border-radius:10px; padding:12px; font-size:.95rem;">CuSO₄·5H₂O → CuSO₄ + 5H₂O</p>
+      <div class="materials-row">
+        <span class="material-chip">Copper sulphate</span>
+        <span class="material-chip">Desiccator</span>
+        <span class="material-chip">Chemical balance</span>
+        <span class="material-chip">Porcelain bowl</span>
+        <span class="material-chip">Tripod stand + net</span>
+        <span class="material-chip">Bunsen burner</span>
+      </div>
+      <div class="procedure-list">
+        <div class="procedure-item"><p>Weigh the empty porcelain bowl — call this mass <strong>a</strong>. Add copper sulphate and weigh again — call this <strong>b</strong>, so the sample itself weighs (b − a) g.</p></div>
+        <div class="procedure-item"><p>Set the bowl on a net over a tripod stand and heat gently and evenly with a Bunsen burner.</p></div>
+        <div class="procedure-item"><p>Watch the colour fade from blue to white as the crystal water evaporates.</p></div>
+        <div class="procedure-item"><p>Once the colour change is complete, stop heating.</p></div>
+        <div class="procedure-item"><p>Cool the bowl quickly in a desiccator (to stop it re‑absorbing moisture) and weigh again — call this <strong>c</strong>.</p></div>
+      </div>
+      <div class="caution-box"><b>Caution:</b> heat slowly and evenly so every spot dries out, and weigh again quickly once heating stops.</div>
+      <p class="prose" style="margin: 16px 0 8px; color:var(--chalk-dim); font-size:.9rem;">The water driven off has mass (b − c) grams, out of a (b − a) gram sample. So:</p>
+      <p style="text-align:center; font-family:var(--mono); color:var(--gold); font-size:1.05rem;">% crystal water = [(b − c) ÷ (b − a)] × 100%</p>
+    </div>
+  </div>
+</section>
+<section class="chapter-section" id="summary">
+  <div class="container">
+    <div class="sec-head reveal">
+      <div class="sec-eyebrow">Zooming out</div>
+      <h2 class="sec-title">The big picture</h2>
+      <p class="sec-lede">Every calculation in this chapter is really just one idea, worn in different disguises: convert whatever you're given into moles, then convert moles into whatever you actually need.</p>
+    </div>
+
+    <div class="compare-grid reveal">
+      <div class="compare-card ionic">
+        <h4>By mass</h4>
+        <ul>
+          <li>n = w ÷ M</li>
+          <li>Works for solids, liquids, gases — anything with a molar mass</li>
+          <li>Feeds directly into molarity: w = SVM ÷ 1000</li>
+        </ul>
+      </div>
+      <div class="compare-card covalent">
+        <h4>By particle count</h4>
+        <ul>
+          <li>n = N ÷ 6.023×10²³</li>
+          <li>Ties atoms, molecules and ions to the same Avogadro number</li>
+          <li>The definition the whole chapter is built on</li>
+        </ul>
+      </div>
+      <div class="compare-card metallic">
+        <h4>By volume (gases only)</h4>
+        <ul>
+          <li>n = V ÷ 22.4 at STP</li>
+          <li>Same 22.4 L for every gas — identity doesn't matter</li>
+          <li>Only valid at standard temperature &amp; pressure</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="mnemonic-box reveal">
+      <span class="word">"One mole, many masks"</span>
+      <p>mass, particle count and gas volume are three completely different-looking numbers that always describe the exact same pile of matter — the mole is just the translator between them.</p>
+    </div>
+
+    <div class="sec-head reveal" style="margin-top:46px;">
+      <h3 class="sec-title" style="font-size:1.3rem;">Formula cheat‑sheet</h3>
+    </div>
+    <div class="cheat-grid reveal">
+      <div class="cheat-card"><div class="name">Moles from mass</div><div class="formula">n = w / M</div></div>
+      <div class="cheat-card"><div class="name">Moles from volume (STP)</div><div class="formula">n = V / 22.4</div></div>
+      <div class="cheat-card"><div class="name">Moles from particles</div><div class="formula">n = N / 6.023×10²³</div></div>
+      <div class="cheat-card"><div class="name">Molarity equation</div><div class="formula">w = SVM / 1000</div></div>
+      <div class="cheat-card"><div class="name">Percent composition</div><div class="formula">(mass of element / total) × 100</div></div>
+      <div class="cheat-card"><div class="name">Molecular from empirical</div><div class="formula">n = molec. mass / emp. mass</div></div>
+      <div class="cheat-card"><div class="name">Percent yield</div><div class="formula">(actual / theoretical) × 100</div></div>
+      <div class="cheat-card"><div class="name">Lattice water</div><div class="formula">[(b−c)/(b−a)] × 100%</div></div>
+      <div class="cheat-card"><div class="name">Avogadro's number</div><div class="formula">6.023 × 10²³ /mol</div></div>
+    </div>
+
+    <div class="prose reveal" style="margin-top:34px; max-width:720px; margin-left:auto; margin-right:auto; text-align:center;">
+      <p>Every balance, flask and burner in the lab exists to answer one question in different clothes: <em>how much, exactly, do I have?</em> The mole is simply the unit that makes that question answerable.</p>
+    </div>
+  </div>
+</section>
+</main>
+
+<footer class="site-footer">
+  <span class="hand">✦ made for chemistry, class 9–10 ✦</span>
+  Chapter Six — Concept of Mole and Chemical Counting · moles → molar mass → solutions → formulas → stoichiometry
+</footer>
+<script>
+(function(){
+"use strict";
+
+const $ = (sel,ctx)=> (ctx||document).querySelector(sel);
+const $$ = (sel,ctx)=> Array.from((ctx||document).querySelectorAll(sel));
+const clamp = (v,mn,mx)=> Math.max(mn,Math.min(mx,v));
+const AVOGADRO = 6.023e23;
+const fmt = (n)=>{
+  if(n===null||n===undefined||isNaN(n)) return '—';
+  if(Math.abs(n) !== 0 && (Math.abs(n) < 0.001 || Math.abs(n) >= 100000)) return n.toExponential(3).replace('e+','×10').replace('e-','×10⁻');
+  return (Math.round(n*10000)/10000).toLocaleString(undefined,{maximumFractionDigits:4});
+};
+const subMap = {'0':'₀','1':'₁','2':'₂','3':'₃','4':'₄','5':'₅','6':'₆','7':'₇','8':'₈','9':'₉'};
+const toSub = n => String(n).split('').map(d=>subMap[d]||d).join('');
+
+/* ============================================================
+   AMBIENT CHALK DUST
+============================================================ */
+(function chalkDust(){
+  const canvas = document.getElementById('chalkDust');
+  const ctx = canvas.getContext('2d');
+  let W,H;
+  function resize(){ W=canvas.width=window.innerWidth; H=canvas.height=window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  const N = window.innerWidth < 700 ? 28 : 55;
+  const particles = Array.from({length:N},()=>({
+    x: Math.random()*W, y: Math.random()*H,
+    r: Math.random()*1.5+0.4, s: Math.random()*0.25+0.05, o: Math.random()*0.45+0.08
+  }));
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function tick(){
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle = '#eef1f7';
+    particles.forEach(p=>{
+      if(!reduceMotion){ p.y += p.s; if(p.y>H){ p.y=-4; p.x=Math.random()*W; } }
+      ctx.globalAlpha = p.o;
+      ctx.beginPath(); ctx.arc(p.x,p.y,p.r,0,Math.PI*2); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(tick);
+  }
+  tick();
+})();
+
+/* ============================================================
+   NAV RAIL / PROGRESS / SCROLLSPY / REVEAL
+============================================================ */
+(function nav(){
+  const rail = document.getElementById('rail');
+  const toggle = document.getElementById('railToggle');
+  const scrim = document.getElementById('railScrim');
+  function closeRail(){ rail.classList.remove('is-open'); toggle.classList.remove('is-open'); scrim.classList.remove('is-open'); }
+  toggle.addEventListener('click', ()=>{
+    const open = rail.classList.toggle('is-open');
+    toggle.classList.toggle('is-open', open);
+    scrim.classList.toggle('is-open', open);
+  });
+  scrim.addEventListener('click', closeRail);
+  $$('.rail__item').forEach(a=>a.addEventListener('click', closeRail));
+
+  window.addEventListener('scroll', ()=>{
+    const d = document.documentElement;
+    const pct = (d.scrollTop) / (d.scrollHeight - d.clientHeight) * 100;
+    document.getElementById('topProgress').style.width = clamp(pct,0,100)+'%';
+  }, {passive:true});
+
+  const order = ['objectives','mole','molvol','molformula','solution','percent','empirical','molecular','equations','balancing','stoichiometry','limiting','yield','lab','summary'];
+  const items = {}; order.forEach(id=>{ items[id] = document.querySelector(`.rail__item[data-target="${id}"]`); });
+  function updateRail(id){
+    const idx = order.indexOf(id);
+    order.forEach((oid,i)=>{
+      const el = items[oid]; if(!el) return;
+      el.classList.toggle('is-active', i===idx);
+      el.classList.toggle('is-done', i<idx);
+    });
+  }
+  const sections = order.map(id=>document.getElementById(id)).filter(Boolean);
+  const secObserver = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting) updateRail(e.target.id); });
+  }, {rootMargin:'-42% 0px -50% 0px', threshold:0});
+  sections.forEach(s=>secObserver.observe(s));
+
+  const revealObserver = new IntersectionObserver(entries=>{
+    entries.forEach(e=>{ if(e.isIntersecting){ e.target.classList.add('is-visible'); revealObserver.unobserve(e.target); } });
+  }, {threshold:0.1});
+  $$('.reveal').forEach(el=>revealObserver.observe(el));
+})();
+
+/* ============================================================
+   6.1 / 6.1.1 — MOLE CONVERTER (generic, reused twice)
+============================================================ */
+const COMPOUNDS_ALL = [
+  {key:'h2o', label:'H₂O', mass:18},
+  {key:'co2', label:'CO₂', mass:44},
+  {key:'nacl', label:'NaCl', mass:58.5},
+  {key:'hcl', label:'HCl', mass:36.5},
+  {key:'h2so4', label:'H₂SO₄', mass:98},
+  {key:'o2', label:'O₂', mass:32},
+  {key:'n2', label:'N₂', mass:28},
+  {key:'nh3', label:'NH₃', mass:17},
+  {key:'ch4', label:'CH₄', mass:16},
+  {key:'cl2', label:'Cl₂', mass:71},
+  {key:'cuso4', label:'CuSO₄·5H₂O', mass:249.5},
+  {key:'custom', label:'Custom…', mass:null}
+];
+const COMPOUNDS_GAS = COMPOUNDS_ALL.filter(c=>['co2','o2','n2','nh3','ch4','cl2','h2o','custom'].includes(c.key));
+
+function buildConverter(opts){
+  const { chipsId, customId, amountId, representsId, resultId, list, hasVolume, defaultKey } = opts;
+  const chipsEl = document.getElementById(chipsId);
+  chipsEl.innerHTML = list.map((c)=>`<button class="chip${c.key===defaultKey?' is-active':''}" data-key="${c.key}">${c.label}</button>`).join('');
+  const customInput = document.getElementById(customId);
+  const amountInput = document.getElementById(amountId);
+  const representsSelect = document.getElementById(representsId);
+  const resultEl = document.getElementById(resultId);
+  let selected = list.find(c=>c.key===defaultKey) || list[0];
+
+  function currentMolarMass(){
+    if(selected.key==='custom'){ return parseFloat(customInput.value) || 0; }
+    return selected.mass;
+  }
+
+  function compute(){
+    const M = currentMolarMass();
+    const amt = parseFloat(amountInput.value);
+    const mode = representsSelect.value;
+    if(!M || M<=0 || isNaN(amt) || amt<0){
+      resultEl.innerHTML = `<div class="answer">—</div><div class="steps"><div>Enter a valid molar mass and amount.</div></div>`;
+      return;
+    }
+    let n, w, N, V;
+    if(mode==='mass'){ w=amt; n=w/M; }
+    else if(mode==='moles'){ n=amt; w=n*M; }
+    else if(mode==='particles'){ N=amt; n=N/AVOGADRO; w=n*M; }
+    else if(mode==='volume'){ V=amt; n=V/22.4; w=n*M; }
+    N = n*AVOGADRO;
+    V = n*22.4;
+    const steps = [];
+    steps.push(`Molar mass used: M = ${fmt(M)} g/mol`);
+    steps.push(`Moles, n = ${fmt(n)} mol`);
+    steps.push(`Mass, w = n × M = ${fmt(w)} g`);
+    steps.push(`Particles, N = n × 6.023×10²³ = ${fmt(N)}`);
+    if(hasVolume) steps.push(`Volume at STP, V = n × 22.4 = ${fmt(V)} L`);
+    resultEl.innerHTML = `<div class="answer">n = ${fmt(n)} mol</div><div class="steps">${steps.map(s=>`<div>${s}</div>`).join('')}</div>`;
+  }
+
+  chipsEl.addEventListener('click', e=>{
+    const btn = e.target.closest('.chip'); if(!btn) return;
+    $$('.chip', chipsEl).forEach(c=>c.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    selected = list.find(c=>c.key===btn.dataset.key);
+    customInput.disabled = selected.key!=='custom';
+    compute();
+  });
+  customInput.addEventListener('input', compute);
+  amountInput.addEventListener('input', compute);
+  representsSelect.addEventListener('change', compute);
+  customInput.disabled = selected.key!=='custom';
+  compute();
+}
+
+buildConverter({
+  chipsId:'moleCompoundChips', customId:'moleCustomMass', amountId:'moleAmount',
+  representsId:'moleRepresents', resultId:'moleConverterResult',
+  list: COMPOUNDS_ALL, hasVolume:false, defaultKey:'h2o'
+});
+buildConverter({
+  chipsId:'gasCompoundChips', customId:'gasCustomMass', amountId:'gasAmount',
+  representsId:'gasRepresents', resultId:'gasConverterResult',
+  list: COMPOUNDS_GAS, hasVolume:true, defaultKey:'co2'
+});
+
+/* ============================================================
+   6.1.3 — BEAKER DILUTE/CONCENTRATED DEMO
+============================================================ */
+(function beakerDemo(){
+  const slider = document.getElementById('beakerSlider');
+  const label = document.getElementById('beakerLabel');
+  const dotsGroup = document.getElementById('beakerDots');
+  function render(){
+    const n = parseInt(slider.value,10);
+    let html = '';
+    for(let i=0;i<n;i++){
+      const x = 30 + Math.random()*100;
+      const y = 95 + Math.random()*85;
+      html += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3" class="solute-dot"/>`;
+    }
+    dotsGroup.innerHTML = html;
+    const pct = (n-slider.min)/(slider.max-slider.min);
+    let text = 'very dilute';
+    if(pct>0.8) text='concentrated';
+    else if(pct>0.55) text='fairly concentrated';
+    else if(pct>0.3) text='dilute';
+    label.textContent = text;
+  }
+  slider.addEventListener('input', render);
+  render();
+})();
+
+/* ============================================================
+   6.1.3 — MOLARITY SOLVER  (w = S*V*M / 1000)
+============================================================ */
+(function molaritySolver(){
+  const toggle = document.getElementById('molaritySolveFor');
+  const fields = { w: document.getElementById('fieldW'), S: document.getElementById('fieldS'), V: document.getElementById('fieldV'), M: document.getElementById('fieldM') };
+  const inputs = { w: document.getElementById('inputW'), S: document.getElementById('inputS'), V: document.getElementById('inputV'), M: document.getElementById('inputM') };
+  const resultEl = document.getElementById('molarityResult');
+  let solveFor = 'w';
+
+  function setTarget(t){
+    solveFor = t;
+    Object.keys(fields).forEach(k=>{
+      fields[k].classList.toggle('is-target', k===t);
+      inputs[k].disabled = (k===t);
+    });
+    compute();
+  }
+  function compute(){
+    const w = parseFloat(inputs.w.value), S = parseFloat(inputs.S.value), V = parseFloat(inputs.V.value), M = parseFloat(inputs.M.value);
+    let out=null, formula='';
+    if(solveFor==='w'){ out = (S*V*M)/1000; inputs.w.value = isNaN(out)?'':fmt(out); formula = `w = (S × V × M) / 1000 = (${fmt(S)} × ${fmt(V)} × ${fmt(M)}) / 1000`; }
+    else if(solveFor==='S'){ out = (w*1000)/(V*M); inputs.S.value = isNaN(out)?'':fmt(out); formula = `S = (w × 1000) / (V × M) = (${fmt(w)} × 1000) / (${fmt(V)} × ${fmt(M)})`; }
+    else if(solveFor==='V'){ out = (w*1000)/(S*M); inputs.V.value = isNaN(out)?'':fmt(out); formula = `V = (w × 1000) / (S × M) = (${fmt(w)} × 1000) / (${fmt(S)} × ${fmt(M)})`; }
+    else if(solveFor==='M'){ out = (w*1000)/(S*V); inputs.M.value = isNaN(out)?'':fmt(out); formula = `M = (w × 1000) / (S × V) = (${fmt(w)} × 1000) / (${fmt(S)} × ${fmt(V)})`; }
+    if(out===null || isNaN(out)){
+      resultEl.innerHTML = `<div class="answer">—</div><div class="steps"><div>Fill in the other three fields.</div></div>`;
+    } else {
+      const unit = solveFor==='w' ? 'g' : solveFor==='S' ? 'mol/L' : solveFor==='V' ? 'mL' : 'g/mol';
+      resultEl.innerHTML = `<div class="answer">${fmt(out)} ${unit}</div><div class="steps"><div>${formula}</div></div>`;
+    }
+  }
+  toggle.addEventListener('click', e=>{
+    const btn = e.target.closest('.chip'); if(!btn) return;
+    $$('.chip', toggle).forEach(c=>c.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    setTarget(btn.dataset.solve);
+  });
+  Object.values(inputs).forEach(inp=>inp.addEventListener('input', compute));
+  setTarget('w');
+})();
+
+/* ============================================================
+   6.2 — PERCENT COMPOSITION CALCULATOR
+============================================================ */
+(function percentComposition(){
+  const COMPOUNDS = [
+    {key:'hcl', label:'HCl', elements:[{sym:'H',mass:1,count:1,color:'#45c7d6'},{sym:'Cl',mass:35.5,count:1,color:'#63a9f0'}]},
+    {key:'h2o', label:'H₂O', elements:[{sym:'H',mass:1,count:2,color:'#45c7d6'},{sym:'O',mass:16,count:1,color:'#63a9f0'}]},
+    {key:'h2so4', label:'H₂SO₄', elements:[{sym:'H',mass:1,count:2,color:'#45c7d6'},{sym:'S',mass:32,count:1,color:'#e8b84b'},{sym:'O',mass:16,count:4,color:'#63a9f0'}]},
+    {key:'al2so43', label:'Al₂(SO₄)₃', elements:[{sym:'Al',mass:27,count:2,color:'#e8724a'},{sym:'S',mass:32,count:3,color:'#e8b84b'},{sym:'O',mass:16,count:12,color:'#63a9f0'}]},
+    {key:'nacl', label:'NaCl', elements:[{sym:'Na',mass:23,count:1,color:'#e8724a'},{sym:'Cl',mass:35.5,count:1,color:'#63a9f0'}]},
+    {key:'caco3', label:'CaCO₃', elements:[{sym:'Ca',mass:40,count:1,color:'#e8724a'},{sym:'C',mass:12,count:1,color:'#45c7d6'},{sym:'O',mass:16,count:3,color:'#63a9f0'}]},
+    {key:'c6h12o6', label:'C₆H₁₂O₆', elements:[{sym:'C',mass:12,count:6,color:'#45c7d6'},{sym:'H',mass:1,count:12,color:'#e8b84b'},{sym:'O',mass:16,count:6,color:'#63a9f0'}]}
+  ];
+  const chipsEl = document.getElementById('percentChips');
+  const chartEl = document.getElementById('percentBarChart');
+  const labelEl = document.getElementById('percentFormulaLabel');
+  chipsEl.innerHTML = COMPOUNDS.map((c,i)=>`<button class="chip${i===1?' is-active':''}" data-key="${c.key}">${c.label}</button>`).join('');
+
+  function render(key){
+    const compound = COMPOUNDS.find(c=>c.key===key);
+    const molar = compound.elements.reduce((s,e)=>s+e.mass*e.count,0);
+    chartEl.innerHTML = compound.elements.map(e=>{
+      const pct = (e.mass*e.count*100/molar);
+      return `<div class="bar-col"><div class="bar-value">${pct.toFixed(2)}%</div><div class="bar" data-h="${pct}" style="background:${e.color};"></div><div class="bar-label">${e.sym}</div></div>`;
+    }).join('');
+    labelEl.textContent = `${compound.label} — molecular mass ${molar}`;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      $$('.bar', chartEl).forEach(bar=>{ bar.style.height = (parseFloat(bar.dataset.h)/100*160)+'px'; });
+    }));
+  }
+  chipsEl.addEventListener('click', e=>{
+    const btn = e.target.closest('.chip'); if(!btn) return;
+    $$('.chip', chipsEl).forEach(c=>c.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    render(btn.dataset.key);
+  });
+  render('h2o');
+})();
+
+/* ============================================================
+   6.2.1 — EMPIRICAL FORMULA STEPPER
+============================================================ */
+(function empiricalStepper(){
+  const PRESETS = [
+    { key:'ch', label:'C 92.31% + H 7.69%', mode:'percent',
+      els:[{sym:'C',value:92.31,atomic:12},{sym:'H',value:7.69,atomic:1}] },
+    { key:'h2so4', label:'H 2.04% + S 32.65% + O 65.30%', mode:'percent',
+      els:[{sym:'H',value:2.04,atomic:1},{sym:'S',value:32.65,atomic:32},{sym:'O',value:65.30,atomic:16}] },
+    { key:'h2o', label:'H 11.11% + O 88.89%', mode:'percent',
+      els:[{sym:'H',value:11.11,atomic:1},{sym:'O',value:88.89,atomic:16}] },
+    { key:'co2mass', label:'3g C + 8g O', mode:'mass',
+      els:[{sym:'C',value:3,atomic:12},{sym:'O',value:8,atomic:16}] }
+  ];
+  const chipsEl = document.getElementById('empiricalChips');
+  const dotsEl = document.getElementById('empiricalDots');
+  const titleEl = document.getElementById('empiricalStepTitle');
+  const contentEl = document.getElementById('empiricalStepContent');
+  chipsEl.innerHTML = PRESETS.map((p,i)=>`<button class="chip${i===0?' is-active':''}" data-key="${p.key}">${p.label}</button>`).join('');
+
+  let current = PRESETS[0];
+  let step = 0;
+  const TOTAL_STEPS = 4;
+
+  function computeAll(preset){
+    const els = preset.els.map(e=>({...e}));
+    els.forEach(e=>{ e.q1 = e.value/e.atomic; });
+    const minQ = Math.min(...els.map(e=>e.q1));
+    els.forEach(e=>{ e.q2 = e.q1/minQ; });
+    let multiplier = 1;
+    for(let m=1;m<=6;m++){
+      if(els.every(e=> Math.abs(e.q2*m - Math.round(e.q2*m)) < 0.05)){ multiplier = m; break; }
+    }
+    els.forEach(e=>{ e.final = Math.round(e.q2*multiplier); });
+    return els;
+  }
+
+  function render(){
+    const els = computeAll(current);
+    dotsEl.innerHTML = Array.from({length:TOTAL_STEPS},(_,i)=>`<span class="dot ${i===step?'is-active':(i<step?'is-done':'')}"></span>`).join('');
+    const modeWord = current.mode==='percent' ? 'percent composition' : 'mass';
+    if(step===0){
+      titleEl.textContent = 'Step 1 — divide by atomic mass';
+      contentEl.innerHTML = `<div>Divide each element's ${modeWord} by its own atomic mass:</div><div class="big">${els.map(e=>`${e.sym} = ${e.value}/${e.atomic} = ${e.q1.toFixed(2)}`).join(' &nbsp;·&nbsp; ')}</div>`;
+    } else if(step===1){
+      const minQ = Math.min(...els.map(e=>e.q1));
+      titleEl.textContent = 'Step 2 — divide by the smallest quotient';
+      contentEl.innerHTML = `<div>The smallest quotient is ${minQ.toFixed(2)}. Divide every quotient by it:</div><div class="big">${els.map(e=>`${e.sym} = ${e.q1.toFixed(2)}/${minQ.toFixed(2)} = ${e.q2.toFixed(2)}`).join(' &nbsp;·&nbsp; ')}</div>`;
+    } else if(step===2){
+      titleEl.textContent = 'Step 3 — round to whole numbers';
+      contentEl.innerHTML = `<div>Scale up if needed so every ratio becomes a whole number:</div><div class="big">${els.map(e=>`${e.sym} → ${e.final}`).join(' &nbsp;·&nbsp; ')}</div>`;
+    } else {
+      const formula = els.map(e=> e.sym + (e.final>1?toSub(e.final):'')).join('');
+      titleEl.textContent = 'Step 4 — write the empirical formula';
+      contentEl.innerHTML = `<div>Write those whole numbers as subscripts (skip a "1"):</div><div class="big" style="color:var(--gold); font-size:1.7rem;">${formula}</div>`;
+    }
+  }
+  document.getElementById('empiricalPrev').addEventListener('click', ()=>{ step = clamp(step-1,0,TOTAL_STEPS-1); render(); });
+  document.getElementById('empiricalNext').addEventListener('click', ()=>{ step = clamp(step+1,0,TOTAL_STEPS-1); render(); });
+  chipsEl.addEventListener('click', e=>{
+    const btn = e.target.closest('.chip'); if(!btn) return;
+    $$('.chip', chipsEl).forEach(c=>c.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    current = PRESETS.find(p=>p.key===btn.dataset.key);
+    step = 0; render();
+  });
+  render();
+})();
+
+/* ============================================================
+   6.2.2 — MOLECULAR FORMULA FROM EMPIRICAL
+============================================================ */
+(function molecularFormula(){
+  const empMassInput = document.getElementById('molecEmpMass');
+  const molMassInput = document.getElementById('molecMolMass');
+  const resultEl = document.getElementById('molecResult');
+  function compute(){
+    const empMass = parseFloat(empMassInput.value);
+    const molMass = parseFloat(molMassInput.value);
+    if(!empMass || !molMass){ resultEl.innerHTML = `<div class="answer">—</div>`; return; }
+    const n = molMass/empMass;
+    const nRounded = Math.round(n);
+    const formula = `C${toSub(nRounded)}H${toSub(nRounded)}`;
+    resultEl.innerHTML = `<div class="answer">${formula}</div><div class="steps"><div>n = molecular mass ÷ empirical mass = ${fmt(molMass)} ÷ ${fmt(empMass)} = ${fmt(n)} ≈ ${nRounded}</div><div>Molecular formula = (CH)ₙ = (CH)${toSub(nRounded)} = ${formula}</div></div>`;
+  }
+  empMassInput.addEventListener('input', compute);
+  molMassInput.addEventListener('input', compute);
+  compute();
+})();
+
+/* ============================================================
+   6.3.1 — EQUATION BALANCER STEPPER
+============================================================ */
+(function balancer(){
+  const REACTIONS = {
+    mg: {
+      species: [
+        {formula:'Mg', display:'Mg', atoms:{Mg:1}},
+        {formula:'HCl', display:'HCl', atoms:{H:1,Cl:1}},
+        {formula:'MgCl2', display:'MgCl₂', atoms:{Mg:1,Cl:2}},
+        {formula:'H2', display:'H₂', atoms:{H:2}}
+      ],
+      reactantCount: 2,
+      frames: [ [1,1,1,1], [1,2,1,1] ],
+      notes: ['Cl and H are unbalanced — Mg is already fine.', 'Multiply HCl by 2 → every element now balances.']
+    },
+    na2co3: {
+      species: [
+        {formula:'Na2CO3', display:'Na₂CO₃', atoms:{Na:2,C:1,O:3}},
+        {formula:'HCl', display:'HCl', atoms:{H:1,Cl:1}},
+        {formula:'NaCl', display:'NaCl', atoms:{Na:1,Cl:1}},
+        {formula:'H2O', display:'H₂O', atoms:{H:2,O:1}},
+        {formula:'CO2', display:'CO₂', atoms:{C:1,O:2}}
+      ],
+      reactantCount: 2,
+      frames: [ [1,1,1,1,1], [1,1,2,1,1], [1,2,2,1,1] ],
+      notes: ['Na is unbalanced (2 vs 1).', 'Multiply NaCl by 2 → now Cl is unbalanced.', 'Multiply HCl by 2 → everything balances.']
+    },
+    al2o3: {
+      species: [
+        {formula:'Al2O3', display:'Al₂O₃', atoms:{Al:2,O:3}},
+        {formula:'HCl', display:'HCl', atoms:{H:1,Cl:1}},
+        {formula:'AlCl3', display:'AlCl₃', atoms:{Al:1,Cl:3}},
+        {formula:'H2O', display:'H₂O', atoms:{H:2,O:1}}
+      ],
+      reactantCount: 2,
+      frames: [ [1,1,1,1], [1,1,2,1], [1,6,2,1], [1,6,2,3] ],
+      notes: ['Al is unbalanced (2 vs 1).', 'Multiply AlCl₃ by 2 → now Cl is unbalanced (1 vs 6).', 'Multiply HCl by 6 → now O and H are unbalanced.', 'Multiply H₂O by 3 → everything balances.']
+    }
+  };
+  const chipsEl = document.getElementById('balanceTabs');
+  const dotsEl = document.getElementById('balanceDots');
+  const eqEl = document.getElementById('balanceEq');
+  const tallyEl = document.getElementById('balanceTally');
+  const captionEl = document.getElementById('balanceCaption');
+  let currentKey = 'mg';
+  let frame = 0;
+
+  function render(prevFrame){
+    const r = REACTIONS[currentKey];
+    const coeffs = r.frames[frame];
+    dotsEl.innerHTML = r.frames.map((_,i)=>`<span class="dot ${i===frame?'is-active':(i<frame?'is-done':'')}"></span>`).join('');
+
+    let eqHtml = '';
+    r.species.forEach((sp,i)=>{
+      if(i>0) eqHtml += i===r.reactantCount ? `<span class="arrow">→</span>` : `<span class="plus">+</span>`;
+      const bumped = prevFrame!==undefined && prevFrame[i]!==coeffs[i];
+      eqHtml += `<span class="coef${bumped?' is-bump':''}">${coeffs[i]>1?coeffs[i]:''}</span>${sp.display}`;
+    });
+    eqEl.innerHTML = eqHtml;
+
+    const elements = {};
+    r.species.forEach((sp,i)=>{
+      Object.keys(sp.atoms).forEach(el=>{
+        if(!elements[el]) elements[el] = {left:0,right:0};
+        const side = i < r.reactantCount ? 'left' : 'right';
+        elements[el][side] += sp.atoms[el]*coeffs[i];
+      });
+    });
+    tallyEl.innerHTML = Object.keys(elements).map(el=>{
+      const {left,right} = elements[el];
+      const bal = left===right;
+      return `<div class="tally__item"><div class="sym">${el}</div><div class="tally__bars">
+        <div class="tally__bar"><div class="count ${bal?'balanced':'unbalanced'}">${left}</div><div class="side">left</div></div>
+        <div class="tally__bar"><div class="count ${bal?'balanced':'unbalanced'}">${right}</div><div class="side">right</div></div>
+      </div></div>`;
+    }).join('');
+
+    const allBalanced = Object.values(elements).every(e=>e.left===e.right);
+    captionEl.innerHTML = frame===0 ? r.notes[0] : (allBalanced ? `<b>Balanced!</b> ${r.notes[frame]}` : r.notes[frame]);
+    document.getElementById('balancePrev').disabled = frame===0;
+    document.getElementById('balanceNext').disabled = frame===r.frames.length-1;
+  }
+
+  document.getElementById('balancePrev').addEventListener('click', ()=>{
+    const r = REACTIONS[currentKey];
+    const prev = r.frames[frame];
+    frame = clamp(frame-1,0,r.frames.length-1);
+    render(prev);
+  });
+  document.getElementById('balanceNext').addEventListener('click', ()=>{
+    const r = REACTIONS[currentKey];
+    const prev = r.frames[frame];
+    frame = clamp(frame+1,0,r.frames.length-1);
+    render(prev);
+  });
+  chipsEl.addEventListener('click', e=>{
+    const btn = e.target.closest('.chip'); if(!btn) return;
+    $$('.chip', chipsEl).forEach(c=>c.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    currentKey = btn.dataset.reaction;
+    frame = 0;
+    render();
+  });
+  render();
+})();
+
+/* ============================================================
+   6.3.2 — STOICHIOMETRY CALCULATOR
+============================================================ */
+(function stoichiometry(){
+  const REACTIONS = {
+    mgo: { label:'2Mg + O₂ → 2MgO', species:[
+      {name:'Mg', formula:'Mg', coef:2, molar:24},
+      {name:'O2', formula:'O₂', coef:1, molar:32},
+      {name:'MgO', formula:'MgO', coef:2, molar:40}
+    ]},
+    nh3: { label:'N₂ + 3H₂ → 2NH₃', species:[
+      {name:'N2', formula:'N₂', coef:1, molar:28},
+      {name:'H2', formula:'H₂', coef:3, molar:2},
+      {name:'NH3', formula:'NH₃', coef:2, molar:17}
+    ]},
+    caco3: { label:'CaCO₃ →(Δ) CaO + CO₂', species:[
+      {name:'CaCO3', formula:'CaCO₃', coef:1, molar:100},
+      {name:'CaO', formula:'CaO', coef:1, molar:56},
+      {name:'CO2', formula:'CO₂', coef:1, molar:44}
+    ]},
+    hcl: { label:'H₂ + Cl₂ → 2HCl', species:[
+      {name:'H2', formula:'H₂', coef:1, molar:2},
+      {name:'Cl2', formula:'Cl₂', coef:1, molar:71},
+      {name:'HCl', formula:'HCl', coef:2, molar:36.5}
+    ]}
+  };
+  const chipsEl = document.getElementById('stoichReactionChips');
+  const speciesSelect = document.getElementById('stoichKnownSpecies');
+  const massInput = document.getElementById('stoichKnownMass');
+  const tableEl = document.getElementById('stoichTable');
+  chipsEl.innerHTML = Object.keys(REACTIONS).map((k,i)=>`<button class="chip${i===0?' is-active':''}" data-key="${k}">${REACTIONS[k].label}</button>`).join('');
+  let currentKey = 'mgo';
+
+  function populateSelect(){
+    const r = REACTIONS[currentKey];
+    speciesSelect.innerHTML = r.species.map(sp=>`<option value="${sp.name}">${sp.formula}</option>`).join('');
+  }
+  function render(){
+    const r = REACTIONS[currentKey];
+    const knownName = speciesSelect.value;
+    const known = r.species.find(sp=>sp.name===knownName) || r.species[0];
+    const mass = parseFloat(massInput.value) || 0;
+    const knownMoles = mass/known.molar;
+    const perUnit = knownMoles/known.coef;
+
+    let thead = '<thead><tr><th></th>' + r.species.map(sp=>`<th>${sp.coef>1?sp.coef:''}${sp.formula}</th>`).join('') + '</tr></thead>';
+    let moleRow = '<tr><td>Moles</td>' + r.species.map(sp=>`<td class="mono">${fmt(perUnit*sp.coef)} mol</td>`).join('') + '</tr>';
+    let massRow = '<tr><td>Mass</td>' + r.species.map(sp=>`<td class="mono">${fmt(perUnit*sp.coef*sp.molar)} g</td>`).join('') + '</tr>';
+    let particleRow = '<tr><td>Particles</td>' + r.species.map(sp=>`<td class="mono">${fmt(perUnit*sp.coef*AVOGADRO)}</td>`).join('') + '</tr>';
+    tableEl.innerHTML = thead + '<tbody>' + moleRow + particleRow + massRow + '</tbody>';
+  }
+  chipsEl.addEventListener('click', e=>{
+    const btn = e.target.closest('.chip'); if(!btn) return;
+    $$('.chip', chipsEl).forEach(c=>c.classList.remove('is-active'));
+    btn.classList.add('is-active');
+    currentKey = btn.dataset.key;
+    populateSelect();
+    render();
+  });
+  speciesSelect.addEventListener('change', render);
+  massInput.addEventListener('input', render);
+  populateSelect();
+  render();
+})();
+
+/* ============================================================
+   6.4 — LIMITING REACTANT VISUALIZER
+============================================================ */
+(function limitingReactant(){
+  const mgInput = document.getElementById('limitMg');
+  const o2Input = document.getElementById('limitO2');
+  const gridEl = document.getElementById('limitGrid');
+  const resultEl = document.getElementById('limitResult');
+
+  function render(){
+    let mg = clamp(parseInt(mgInput.value,10)||0, 0, 100);
+    let o2 = clamp(parseInt(o2Input.value,10)||0, 0, 100);
+    const o2Needed = mg/2;
+    let limiting, mgUsed, o2Used, mgLeft, o2Left, mgoProduced;
+    if(o2 >= o2Needed){
+      limiting = 'Mg'; mgUsed = mg; o2Used = o2Needed; mgLeft = 0; o2Left = o2-o2Needed;
+    } else {
+      limiting = 'O₂'; o2Used = o2; mgUsed = o2*2; o2Left = 0; mgLeft = mg-mgUsed;
+    }
+    mgoProduced = mgUsed;
+
+    let html = '';
+    for(let i=0;i<mg;i++){
+      const leftover = i >= mgUsed;
+      html += `<div class="particle metal${leftover?' is-leftover':''}">Mg</div>`;
+    }
+    for(let i=0;i<o2;i++){
+      const leftover = i >= o2Used;
+      html += `<div class="particle nonmetal${leftover?' is-leftover':''}">O₂</div>`;
+    }
+    gridEl.innerHTML = html;
+
+    resultEl.innerHTML = `<div class="answer">${limiting} is the limiting reactant</div>
+      <div class="steps">
+        <div>${mg} Mg needs ${fmt(o2Needed)} O₂ molecules to react completely; ${o2} O₂ ${o2>=o2Needed?'is enough':'is not enough'}.</div>
+        <div>Mg used: ${fmt(mgUsed)} &nbsp;·&nbsp; O₂ used: ${fmt(o2Used)} &nbsp;·&nbsp; MgO produced: ${fmt(mgoProduced)} formula units</div>
+        <div>Left over — Mg: ${fmt(mgLeft)} &nbsp;·&nbsp; O₂: ${fmt(o2Left)}</div>
+      </div>`;
+  }
+  mgInput.addEventListener('input', render);
+  o2Input.addEventListener('input', render);
+  render();
+})();
+
+/* ============================================================
+   6.5 — PERCENT YIELD CALCULATOR
+============================================================ */
+(function percentYield(){
+  const theoInput = document.getElementById('yieldTheoretical');
+  const actualInput = document.getElementById('yieldActual');
+  const resultEl = document.getElementById('yieldResult');
+  function compute(){
+    const theo = parseFloat(theoInput.value);
+    const actual = parseFloat(actualInput.value);
+    if(!theo || isNaN(actual)){ resultEl.innerHTML = `<div class="answer">—</div>`; return; }
+    const pct = (actual/theo)*100;
+    resultEl.innerHTML = `<div class="answer">${fmt(pct)}%</div><div class="steps"><div>% yield = (${fmt(actual)} ÷ ${fmt(theo)}) × 100 = ${fmt(pct)}%</div></div>`;
+  }
+  theoInput.addEventListener('input', compute);
+  actualInput.addEventListener('input', compute);
+  compute();
+})();
+
+})();
+
+</script>
+</body>
+</html>
